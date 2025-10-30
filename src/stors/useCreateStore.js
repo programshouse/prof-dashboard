@@ -3,7 +3,7 @@ import axios from "axios";
 
 const API_ROOT = "https://www.programshouse.com/reem/api/v1/admins";
 
-export const useCreateStore = create((set) => ({
+export const useServicesStore = create((set) => ({
   loading: false,
   error: null,
   createdQuiz: null,

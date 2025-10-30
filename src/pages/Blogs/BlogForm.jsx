@@ -63,9 +63,9 @@ export default function BlogFormTiny({ blogId, onSuccess, apiKey = "lmml35k9i4dy
 
   if (loading) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 text-center">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500 mx-auto"></div>
-        <p className="mt-2 text-gray-600 dark:text-gray-300">Loading blog…</p>
+        <p className="mt-2 text-gray-600">Loading blog…</p>
       </div>
     );
   }

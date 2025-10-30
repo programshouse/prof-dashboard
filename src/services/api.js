@@ -74,15 +74,6 @@ export const workshopsAPI = {
 export const servicesAPI = {
   getAll: () => api.get('/services'),
   getById: (id) => api.get(`/services/${id}`),
-  create: (data) => {
-    const formData = new FormData();
-    formData.append('title', data.title);
-    formData.append('description', data.description);
-    if (data.image) formData.append('image', data.image);
-    return api.post('/services', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-  },
   update: (id, data) => {
     const formData = new FormData();
     formData.append('title', data.title);
