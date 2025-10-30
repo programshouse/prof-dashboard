@@ -1,6 +1,6 @@
 // src/components/dashboard/EcommerceMetrics.jsx
 import React, { useEffect, useMemo } from "react";
-import { useApiStore } from "../../stors/useApiStore";
+import { useApiStore } from "../../";
 import { BoxIconLine, GroupIcon } from "../../icons";
 
 function MetricCard({ icon, title, value, loading }) {

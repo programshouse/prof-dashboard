@@ -41,77 +41,7 @@ export const profileAPI = {
   update: (data) => api.put('/profile', data),
 };
 
-// Workshops API
-export const workshopsAPI = {
-  getAll: () => api.get('/workshops'),
-  getById: (id) => api.get(`/workshops/${id}`),
-  create: (data) => {
-    const formData = new FormData();
-    formData.append('title', data.title);
-    formData.append('description', data.description);
-    formData.append('duration', data.duration);
-    if (data.video) formData.append('video', data.video);
-    if (data.image) formData.append('image', data.image);
-    return api.post('/workshops', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-  },
-  update: (id, data) => {
-    const formData = new FormData();
-    formData.append('title', data.title);
-    formData.append('description', data.description);
-    formData.append('duration', data.duration);
-    if (data.video) formData.append('video', data.video);
-    if (data.image) formData.append('image', data.image);
-    return api.put(`/workshops/${id}`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-  },
-  delete: (id) => api.delete(`/workshops/${id}`),
-};
 
-// Services API
-export const servicesAPI = {
-  getAll: () => api.get('/services'),
-  getById: (id) => api.get(`/services/${id}`),
-  update: (id, data) => {
-    const formData = new FormData();
-    formData.append('title', data.title);
-    formData.append('description', data.description);
-    if (data.image) formData.append('image', data.image);
-    return api.put(`/services/${id}`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-  },
-  delete: (id) => api.delete(`/services/${id}`),
-};
-
-// Blogs API
-export const blogsAPI = {
-  getAll: () => api.get('/blogs'),
-  getById: (id) => api.get(`/blogs/${id}`),
-  create: (data) => {
-    const formData = new FormData();
-    formData.append('title', data.title);
-    formData.append('description', data.description);
-    formData.append('category', data.category);
-    if (data.image) formData.append('image', data.image);
-    return api.post('/blogs', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-  },
-  update: (id, data) => {
-    const formData = new FormData();
-    formData.append('title', data.title);
-    formData.append('description', data.description);
-    formData.append('category', data.category);
-    if (data.image) formData.append('image', data.image);
-    return api.put(`/blogs/${id}`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-  },
-  delete: (id) => api.delete(`/blogs/${id}`),
-};
 
 // Contact API
 export const contactAPI = {

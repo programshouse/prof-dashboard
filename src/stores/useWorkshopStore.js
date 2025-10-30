@@ -9,7 +9,7 @@ const authHeaders = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-export const useworkshopsStore = create((set, get) => ({
+export const useWorkshopStore = create((set, get) => ({
   workshops: [],
   workshop: null,
   loading: false,

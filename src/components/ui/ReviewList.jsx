@@ -1,7 +1,7 @@
 // src/pages/reviews/reviews-list.jsx
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useDataStore } from "../../stors/useDataStore.js";
+import { useDataStore } from "../../stores/useDataStore.js";
 
 const Star = ({ filled }) => (
   <svg viewBox="0 0 20 20" className={`h-4 w-4 ${filled ? "text-yellow-500" : "text-gray-300"}`} fill="currentColor">

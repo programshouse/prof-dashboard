@@ -5,7 +5,7 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
-import { useAuthStore } from "./stors/useAuthStore.js";
+import { useAuthStore } from "./stores/useAuthStore";
 import SignIn from "./pages/AuthPages/Signin";
 import SignUp from "./pages/AuthPages/SignUp";
 import NotFound from "./pages/OtherPage/NotFound";

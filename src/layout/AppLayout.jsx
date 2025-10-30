@@ -3,7 +3,7 @@ import { Navigate, Outlet } from "react-router-dom";
 import AppHeader from "./AppHeader";
 import Backdrop from "./Backdrop";
 import AppSidebar from "./AppSidebar";
-import { useAuthStore } from "../stors/useAuthStore";
+import { useAuthStore } from "../stores/useAuthStore";
 import { ToastContainer } from "react-toastify";
 
 const ProtectedRoute = ({ children }) => {

@@ -1,7 +1,7 @@
 // src/components/layout/UserDropdown.jsx
 import React, { useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
-import { useAuthStore } from "../../stors/useAuthStore";
+import { useAuthStore } from "../../stores/useAuthStore";
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);

@@ -2,8 +2,8 @@ import React from "react";
 import PageLayout from "../../components/ui/PageLayout";
 import PageHeader from "../../components/ui/PageHeader";
 import PageCard from "../../components/ui/PageCard";
-import EcommerceMetrics from "../../components/ecommerce/EcommerceMetrics";
-import PendingTopics from "../../components/ecommerce/PendingTopics";
+// import EcommerceMetrics from "../../components/ecommerce/EcommerceMetrics";
+// import PendingTopics from "../../components/ecommerce/PendingTopics";
 
 export default function Home() {
   return (
@@ -14,7 +14,7 @@ export default function Home() {
       />
       
       <div className="col-span-12 space-y-1 xl:col-span-12">
-        <EcommerceMetrics />
+        {/* <EcommerceMetrics /> */}
       </div>
 
       <div className="col-span-12">

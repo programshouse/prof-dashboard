@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useDataStore } from "../../stors/useDataStore.js";
+import { useDataStore } from "../../stores/useDataStore.js";
 
 export default function AllSlidersPage() {
   const { getAllSliders, showSlider, updateSlider, deleteSlider, message } = useDataStore((state) => state); // Accessing the functions from the store

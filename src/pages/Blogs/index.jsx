@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
-import BlogForm from "./BlogForm";
+import BlogFormTiny from "./BlogForm";
 import BlogList from "./BlogList";
 
 export default function Blogs() {
@@ -8,7 +8,7 @@ export default function Blogs() {
   const [showForm, setShowForm] = useState(false);
   const [editingBlog, setEditingBlog] = useState(null);
 
-  const isForm = location.pathname.includes('/form') || showForm;
+  const isForm = location.pathname.includes("/form") || showForm;
 
   const handleEdit = (blog) => {
     setEditingBlog(blog);
@@ -26,18 +26,8 @@ export default function Blogs() {
   };
 
   if (isForm) {
-    return (
-      <BlogForm 
-        blogId={editingBlog?.id} 
-        onSuccess={handleFormSuccess}
-      />
-    );
+    return <BlogFormTiny blogId={editingBlog?.id} onSuccess={handleFormSuccess} />;
   }
 
-  return (
-    <BlogList 
-      onEdit={handleEdit}
-      onAdd={handleAdd}
-    />
-  );
+  return <BlogList onEdit={handleEdit} onAdd={handleAdd} />;
 }
