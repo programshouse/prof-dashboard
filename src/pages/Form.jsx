@@ -1,6 +1,7 @@
 // src/pages/settings/SiteInfoForm.jsx
 import React, { useEffect, useState } from "react";
 import AdminForm from "../../src/components/ui/AdminForm";
+import { settingsAPI } from "../services/api";
 import { FaFacebookF, FaInstagram, FaTwitter, FaLinkedinIn, FaWhatsapp } from "react-icons/fa";
 
 // Optional: wire to your real settings API
@@ -12,6 +13,8 @@ export default function SiteInfoForm({
   onSubmit,             // optional custom submit(payload) => Promise
 }) {
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [form, setForm] = useState({
     siteName: "",
     email: "",
@@ -45,6 +48,39 @@ export default function SiteInfoForm({
     }
   }, [initialData]);
 
+  // If no initialData provided by parent, pull current settings from API
+  useEffect(() => {
+    if (initialData) return;
+    let mounted = true;
+    (async () => {
+      try {
+        setLoading(true);
+        const res = await settingsAPI.get();
+        const data = res?.data?.data ?? res?.data ?? null;
+        if (!mounted || !data) return;
+        setForm((p) => ({
+          ...p,
+          siteName: data.siteName || data.site_name || p.siteName,
+          email: data.email || p.email,
+          phone: data.phone || p.phone,
+          address: data.address || p.address,
+          socials: {
+            facebook: data?.socials?.facebook || data?.facebook || p.socials.facebook,
+            whatsapp: data?.socials?.whatsapp || data?.whatsapp || p.socials.whatsapp,
+            instagram: data?.socials?.instagram || data?.instagram || p.socials.instagram,
+            twitter: data?.socials?.twitter || data?.twitter || p.socials.twitter,
+            linkedin: data?.socials?.linkedin || data?.linkedin || p.socials.linkedin,
+          },
+        }));
+      } catch (e) {
+        console.error("Failed to load settings", e);
+      } finally {
+        setLoading(false);
+      }
+    })();
+    return () => { mounted = false; };
+  }, [initialData]);
+
   const setField = (name, value) => setForm((p) => ({ ...p, [name]: value }));
   const setSocial = (k, v) =>
     setForm((p) => ({ ...p, socials: { ...p.socials, [k]: v } }));
@@ -64,9 +100,7 @@ export default function SiteInfoForm({
       if (onSubmit) {
         await onSubmit(payload);
       } else {
-        // Fallback example (replace with your API):
-        // await settingsAPI.saveSiteInfo(payload);
-        console.log("Submitting site info:", payload);
+        await settingsAPI.update(payload);
       }
       onSuccess && onSuccess();
     } catch (err) {
@@ -78,6 +112,20 @@ export default function SiteInfoForm({
   };
 
   const cancel = () => onSuccess && onSuccess();
+
+  const onDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete current settings?")) return;
+    try {
+      setDeleting(true);
+      await settingsAPI.delete();
+      onSuccess && onSuccess();
+    } catch (e) {
+      console.error(e);
+      alert("Failed to delete settings.");
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const inputCls =
     "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white";
@@ -105,6 +153,18 @@ export default function SiteInfoForm({
       onCancel={cancel}
       submitText={saving ? "Saving..." : "Save Settings"}
       submitDisabled={saving || !valid}
+      extraActions={(
+        <>
+          <button
+            type="button"
+            onClick={onDelete}
+            className="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+            disabled={deleting}
+          >
+            {deleting ? "Deleting..." : "Delete Settings"}
+          </button>
+        </>
+      )}
     >
       {/* Basic Info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

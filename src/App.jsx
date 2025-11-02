@@ -42,7 +42,9 @@ import Profile from "./pages/Profile";
 import Workshop from "./pages/Workshop";
 import Services from "./pages/Services";
 import Blogs from "./pages/Blogs";
+import Subscribers from "./pages/Subscribers";
 import Form from "./pages/Form";
+import SettingsIndex from "./pages/Settings";
 
 
 // GuestOnlyRoute: only guests (not logged-in)
@@ -65,6 +67,10 @@ const router = createBrowserRouter([
           { path: "/services/form", element: <Services /> },
           { path: "/blogs", element: <Blogs /> },
           { path: "/blogs/form", element: <Blogs /> },
+          { path: "/subscribers", element: <Subscribers /> },
+          { path: "/subscribers/form", element: <Subscribers /> },
+          { path: "/settings", element: <SettingsIndex /> },
+          { path: "/settings/form", element: <SettingsIndex /> },
           { path: "/form", element: <Form /> },
           { path: "/card", element: <Card /> },
         ],

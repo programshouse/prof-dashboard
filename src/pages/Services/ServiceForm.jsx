@@ -32,13 +32,7 @@ export default function ServiceForm({ serviceId, onSuccess }) {
         setLoading(true);
         setServerError("");
 
-        // ⚠️ Your store's fetchServiceById calls axios.get(API_ROOT, config)
-        // so we must pass a config object with params + headers.
-        const token = localStorage.getItem("access_token");
-        const data = await fetchServiceById({
-          params: { id: serviceId },
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const data = await fetchServiceById(serviceId);
 
         if (!isMounted) return;
         setFormData({
@@ -109,9 +103,7 @@ export default function ServiceForm({ serviceId, onSuccess }) {
       setSaving(true);
 
       if (serviceId) {
-        // ⚠️ Your store's updateService PATCHes the collection URL,
-        // so send id in the body.
-        await updateService({ id: serviceId, ...payload });
+        await updateService(serviceId, payload);
       } else {
         await createService(payload);
       }

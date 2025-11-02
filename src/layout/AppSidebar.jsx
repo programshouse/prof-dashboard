@@ -5,7 +5,8 @@ import {
   MdWork, 
   MdBusiness, 
   MdArticle, 
-  MdDescription 
+  MdDescription,
+  MdGroups,
 } from "react-icons/md";
 import { ChevronDownIcon } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
@@ -16,7 +17,8 @@ const navItems = [
   { name: "Workshops", icon: <MdWork />,       path: "/workshop" },
   { name: "Services",  icon: <MdBusiness />,   path: "/services" },
   { name: "Blogs",     icon: <MdArticle />,    path: "/blogs" },
-  { name: "Contact",   icon: <MdDescription />,path: "/form" },
+  { name: "Subscribers", icon: <MdGroups />,   path: "/subscribers" },
+  { name: "Contact",   icon: <MdDescription />,path: "/settings" },
 ];
 
 const AppSidebar = () => {

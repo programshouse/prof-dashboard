@@ -3,7 +3,7 @@ import PageLayout from "../../components/ui/PageLayout";
 import PageHeader from "../../components/ui/PageHeader";
 import AdminForm from "../../components/ui/AdminForm";
 import FileUpload from "../../components/ui/FileUpload";
-import { profileAPI } from "../../services/api";
+import { useWhoAmIStore } from "../../stores/useWhoAmIStore";
 
 const MAX_TITLE = 80, MAX_DESC = 600, MAX_FEATURES = 12;
 
@@ -21,17 +21,24 @@ export default function ProfileForm({ onSuccess }) {
   });
 
   // ---- load
+  const fetchAll = useWhoAmIStore((s) => s.fetchAll);
+  const update = useWhoAmIStore((s) => s.update);
+  const create = useWhoAmIStore((s) => s.create);
+
+  // Load first whoami record as the profile
   useEffect(() => {
     (async () => {
       try {
         setLoading(true);
-        const { data } = await profileAPI.get();
+        const list = await fetchAll();
+        const first = Array.isArray(list) && list.length ? list[0] : null;
         const clean = {
-          title: data?.title || "",
-          description: data?.description || "",
-          features: Array.isArray(data?.features) ? data.features : [],
-          image: data?.image || null,
-          video: data?.video || null
+          id: first?.id,
+          title: first?.title || "",
+          description: first?.description || "",
+          features: Array.isArray(first?.features) ? first.features : [],
+          image: first?.image || null,
+          video: first?.video || null,
         };
         setProfileData(clean);
         setFormData(clean);
@@ -39,7 +46,7 @@ export default function ProfileForm({ onSuccess }) {
         setErr("Couldn't load profile. Try again.");
       } finally { setLoading(false); }
     })();
-  }, []);
+  }, [fetchAll]);
 
   // ---- handlers
   const onText = (e) => {
@@ -104,21 +111,30 @@ export default function ProfileForm({ onSuccess }) {
     return saving || Object.keys(vErrs).length > 0 || same;
   }, [profileData, formData, vErrs, saving]);
 
-  // ---- submit (multipart)
+  // ---- submit (JSON-only for whoami endpoints)
   const isFile = (x) => typeof File !== "undefined" && x instanceof File;
   const submit = async (e) => {
     e.preventDefault();
     if (disabled) return;
     try {
       setSaving(true); setErr("");
-      const fd = new FormData();
-      fd.append("title", formData.title.trim());
-      fd.append("description", formData.description.trim());
-      fd.append("features", JSON.stringify(formData.features || []));
-      if (formData.image) fd.append("image", isFile(formData.image) ? formData.image : "");
-      if (formData.video) fd.append("video", isFile(formData.video) ? formData.video : "");
-      await profileAPI.update(fd);
-      setProfileData(formData);
+      const body = {
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        features: formData.features || [],
+        // If image/video is a File, ignore for now (API is JSON-only here)
+        ...(typeof formData.image === "string" ? { image: formData.image } : {}),
+        ...(typeof formData.video === "string" ? { video: formData.video } : {}),
+      };
+      if (profileData?.id) {
+        await update(profileData.id, body);
+      } else {
+        const created = await create(body);
+        if (created?.id) {
+          setProfileData((p) => ({ ...p, id: created.id }));
+        }
+      }
+      setProfileData((p) => ({ ...p, ...body }));
       onSuccess && onSuccess();
     } catch {
       setErr("Update failed. Please retry.");

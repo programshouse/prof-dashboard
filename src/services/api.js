@@ -50,4 +50,11 @@ export const contactAPI = {
   delete: (id) => api.delete(`/contacts/${id}`),
 };
 
+// Settings API (site info) — backend slug: /settings
+export const settingsAPI = {
+  get: () => api.get('/settings'),
+  update: (data) => api.put('/settings', data),
+  delete: () => api.delete('/settings'),
+};
+
 export default api;

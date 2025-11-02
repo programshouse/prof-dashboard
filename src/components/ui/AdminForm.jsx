@@ -7,7 +7,8 @@ const AdminForm = ({
   onCancel,
   submitText = "Save",
   cancelText = "Cancel",
-  className = "" 
+  className = "",
+  extraActions = null,
 }) => {
   return (
     <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 ${className}`}>
@@ -18,7 +19,7 @@ const AdminForm = ({
       <form onSubmit={onSubmit} className="space-y-6">
         {children}
         
-        <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
           <button
             type="submit"
             className="bg-brand-500 hover:bg-brand-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
@@ -32,6 +33,7 @@ const AdminForm = ({
           >
             {cancelText}
           </button>
+          {extraActions}
         </div>
       </form>
     </div>

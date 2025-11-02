@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import PageLayout from "../../components/ui/PageLayout";
 import PageHeader from "../../components/ui/PageHeader";
 import PageCard from "../../components/ui/PageCard";
-import { profileAPI } from "../../services/api";
+import { useWhoAmIStore } from "../../stores/useWhoAmIStore";
 
 export default function ProfileList({ onEdit }) {
   const [profileData, setProfileData] = useState({
@@ -14,21 +14,28 @@ export default function ProfileList({ onEdit }) {
   });
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadProfile();
-  }, []);
+  const fetchAll = useWhoAmIStore((s) => s.fetchAll);
 
-  const loadProfile = async () => {
-    try {
-      setLoading(true);
-      const response = await profileAPI.get();
-      setProfileData(response.data);
-    } catch (error) {
-      console.error("Error loading profile:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoading(true);
+        const list = await fetchAll();
+        const first = Array.isArray(list) && list.length ? list[0] : {};
+        setProfileData({
+          title: first?.title || "",
+          description: first?.description || "",
+          features: Array.isArray(first?.features) ? first.features : [],
+          video: first?.video || null,
+          image: first?.image || null,
+        });
+      } catch (error) {
+        console.error("Error loading profile:", error);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [fetchAll]);
 
   if (loading) {
     return (
