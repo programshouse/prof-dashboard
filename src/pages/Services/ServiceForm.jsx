@@ -1,66 +1,76 @@
-// service form for creating/editing a service
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import PageLayout from "../../components/ui/PageLayout";
+import PageHeader from "../../components/ui/PageHeader";
 import AdminForm from "../../components/ui/AdminForm";
 import FileUpload from "../../components/ui/FileUpload";
-import { useServicesStore } from "../../stores/useServicesStore"; // named import
+import { useServicesStore } from "../../stores/useServicesStore";
 
-const INITIAL_STATE = {
-  title: "",
-  description: "",
-  link: "",
-  image: null, // File | URL string | null
+// Allowed fields only (defensive)
+const pickServicePayload = (o = {}) => {
+  const isFile = typeof File !== "undefined" && o.image instanceof File;
+  return {
+    title: (o.title ?? "").trim(),
+    description: (o.description ?? "").trim(),
+    link: (o.link ?? "").trim() || null,
+    ...(typeof o.image === "string" && !isFile ? { image: o.image } : {}),
+  };
 };
 
-export default function ServiceForm({ serviceId, onSuccess }) {
-  const [formData, setFormData] = useState(INITIAL_STATE);
+export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
+  const [search] = useSearchParams();
+  const qsId = search.get("id");
+  const isReadOnly = search.get("readonly") === "1" || search.get("mode") === "view";
+  const serviceId = propServiceId ?? qsId ?? null;
+
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    link: "",
+    image: null, // string URL | File | null
+  });
   const [loading, setLoading] = useState(Boolean(serviceId));
   const [saving, setSaving] = useState(false);
   const [linkError, setLinkError] = useState("");
   const [serverError, setServerError] = useState("");
 
-  // Select each item separately (avoid returning a new object each render)
-  const createService      = useServicesStore((s) => s.createService);
-  const updateService      = useServicesStore((s) => s.updateService);
-  const fetchServiceById   = useServicesStore((s) => s.fetchServiceById);
+  const fetchServiceById = useServicesStore((s) => s.fetchServiceById);
+  const createService    = useServicesStore((s) => s.createService);
+  const updateService    = useServicesStore((s) => s.updateService);
 
+  // Load existing for edit/show
   useEffect(() => {
-    if (!serviceId) return;
-    let isMounted = true;
-
+    let mounted = true;
     (async () => {
+      if (!serviceId) return;
       try {
         setLoading(true);
         setServerError("");
-
         const data = await fetchServiceById(serviceId);
 
-        if (!isMounted) return;
+        if (!mounted) return;
         setFormData({
           title: data?.title ?? "",
           description: data?.description ?? "",
           link: data?.link ?? "",
-          image: data?.image ?? null, // may be URL string
+          image: typeof data?.image === "string" ? data.image : null, // keep URL only
         });
-      } catch (err) {
-        console.error(err);
-        if (isMounted) setServerError("Failed to load the service. Please try again.");
+      } catch (e) {
+        console.error(e);
+        if (mounted) setServerError("Failed to load service. Please try again.");
       } finally {
-        if (isMounted) setLoading(false);
+        if (mounted) setLoading(false);
       }
     })();
+    return () => { mounted = false; };
+  }, [serviceId, fetchServiceById]);
 
-    return () => { isMounted = false; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [serviceId]);
-
+  // Validate link (optional)
   const validateLink = (val) => {
-    if (!val) {
-      setLinkError("");
-      return true; // optional
-    }
+    if (!val) { setLinkError(""); return true; }
     try {
       const u = new URL(val);
-      if (!/^https?:$/.test(u.protocol)) throw new Error("Invalid protocol");
+      if (!/^https?:$/i.test(u.protocol)) throw new Error("bad protocol");
       setLinkError("");
       return true;
     } catch {
@@ -69,44 +79,37 @@ export default function ServiceForm({ serviceId, onSuccess }) {
     }
   };
 
-  const handleInputChange = (e) => {
+  // Inputs
+  const onText = (e) => {
     const { name, value } = e.target;
     if (name === "link") validateLink(value);
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((p) => ({ ...p, [name]: value }));
   };
 
-  const handleFileChange = (e) => {
-    const { name, files } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: files?.[0] || null }));
+  // FileUpload: accept either native event or direct value
+  const onFile = (evtOrValue) => {
+    if (evtOrValue?.target?.files) {
+      const file = evtOrValue.target.files?.[0] || null;
+      setFormData((p) => ({ ...p, image: file }));
+      return;
+    }
+    // direct controlled value (string | File | null)
+    setFormData((p) => ({ ...p, image: evtOrValue ?? null }));
   };
 
-  // Build payload for your JSON-only store:
-  // - If image is a File, we drop it (store is JSON-only with content-type app/json).
-  // - If image is a URL string, we include it.
-  const payload = useMemo(() => {
-    const isFile = formData.image instanceof File;
-    return {
-      title: formData.title?.trim(),
-      description: formData.description?.trim(),
-      link: formData.link?.trim() || null,
-      ...(typeof formData.image === "string" && !isFile ? { image: formData.image } : {}),
-    };
-  }, [formData]);
+  const payload = useMemo(() => pickServicePayload(formData), [formData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setServerError("");
-    if (!validateLink(formData.link)) return;
-    if (saving) return;
+    if (isReadOnly) { onSuccess && onSuccess(); return; }
+    if (!validateLink(formData.link) || saving) return;
 
     try {
       setSaving(true);
+      setServerError("");
 
-      if (serviceId) {
-        await updateService(serviceId, payload);
-      } else {
-        await createService(payload);
-      }
+      if (serviceId) await updateService(serviceId, payload);
+      else await createService(payload);
 
       onSuccess && onSuccess();
     } catch (err) {
@@ -118,100 +121,117 @@ export default function ServiceForm({ serviceId, onSuccess }) {
     }
   };
 
-  const handleCancel = () => onSuccess && onSuccess();
+  const disabled = isReadOnly;
+  const inputCls =
+    "w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white";
+  const disabledCls = disabled
+    ? "bg-gray-100 dark:bg-gray-800 cursor-not-allowed border-gray-200 dark:border-gray-700"
+    : "border-gray-300";
 
-  if (loading) {
-    return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500 mx-auto" />
-        <p className="mt-2 text-gray-600 dark:text-gray-300">Loading service...</p>
-      </div>
-    );
-  }
+  // Safe preview: only show when it's a string URL
+  const imagePreview =
+    typeof formData.image === "string" ? formData.image : null;
 
   return (
-    <AdminForm
-      title={serviceId ? "Edit Service" : "Add New Service"}
-      onSubmit={handleSubmit}
-      onCancel={handleCancel}
-      submitText={saving ? "Saving..." : serviceId ? "Update Service" : "Create Service"}
-      submitDisabled={saving || !!linkError}
-    >
-      {!!serverError && (
-        <div className="mb-4 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-700/40 dark:bg-red-900/20 dark:text-red-300">
-          {serverError}
-        </div>
-      )}
+    <PageLayout title={`${isReadOnly ? "View" : serviceId ? "Edit" : "Add"} Service | ProfMSE`}>
+      {/* Fixed width like Settings (1400px) */}
+      <div className="mx-auto w-[1400px] max-w-[1400px] px-4">
+        <PageHeader title={`${isReadOnly ? "View" : serviceId ? "Edit" : "Add"} Service`} />
 
-      {/* Title */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Service Title *
-        </label>
-        <input
-          type="text"
-          name="title"
-          value={formData.title}
-          onChange={handleInputChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-          autoComplete="off"
-          required
-        />
-      </div>
+        {loading ? (
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500 mx-auto" />
+            <p className="mt-2 text-gray-600 dark:text-gray-300">Loading service...</p>
+          </div>
+        ) : (
+          <AdminForm
+            title="Service Information"
+            onSubmit={handleSubmit}
+            onCancel={onSuccess}
+            submitText={
+              isReadOnly ? "Close"
+              : saving ? "Saving..."
+              : serviceId ? "Update Service" : "Create Service"
+            }
+            submitDisabled={isReadOnly ? false : saving || !!linkError}
+          >
+            {!!serverError && (
+              <div className="mb-4 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-700/40 dark:bg-red-900/20 dark:text-red-300">
+                {serverError}
+              </div>
+            )}
 
-      {/* Description */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Description *
-        </label>
-        <textarea
-          name="description"
-          value={formData.description}
-          onChange={handleInputChange}
-          rows={4}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-          required
-        />
-      </div>
+            {/* Title */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Service Title *
+              </label>
+              <input
+                name="title"
+                value={formData.title}
+                onChange={onText}
+                className={`${inputCls} ${disabledCls}`}
+                required
+                disabled={disabled}
+              />
+            </div>
 
-      {/* Link (optional) */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Link (optional)
-        </label>
-        <input
-          type="url"
-          name="link"
-          value={formData.link}
-          onChange={handleInputChange}
-          placeholder="https://example.com/service"
-          className={`${
-            linkError ? "border-red-500 focus:ring-red-400" : "border-gray-300 focus:ring-brand-500"
-          } w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
-          inputMode="url"
-          pattern="https?://.*"
-        />
-        {linkError && <p className="mt-1 text-xs text-red-600">{linkError}</p>}
-      </div>
+            {/* Description */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Description *
+              </label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={onText}
+                rows={4}
+                className={`${inputCls} ${disabledCls}`}
+                required
+                disabled={disabled}
+              />
+            </div>
 
-      {/* Image */}
-      <div>
-        <FileUpload
-          label="Service Image"
-          name="image"
-          value={formData.image}
-          onChange={handleFileChange}
-          accept="image/*"
-        />
-        {typeof formData.image === "string" && (
-          <img
-            src={formData.image}
-            alt="Current service"
-            className="mt-2 h-16 w-16 rounded object-cover border border-gray-200 dark:border-gray-700"
-          />
+            {/* Link (optional) */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Link (optional)
+              </label>
+              <input
+                type="url"
+                name="link"
+                value={formData.link}
+                onChange={onText}
+                placeholder="https://example.com/service"
+                className={`${inputCls} ${disabled ? "border-gray-200 dark:border-gray-700" : linkError ? "border-red-500 focus:ring-red-400" : "border-gray-300 focus:ring-brand-500"}`}
+                inputMode="url"
+                pattern="https?://.*"
+                disabled={disabled}
+              />
+              {linkError && <p className="mt-1 text-xs text-red-600">{linkError}</p>}
+            </div>
+
+            {/* Image (JSON-only) */}
+            <div className="mb-2">
+              <FileUpload
+                label="Service Image (URL or pick a file — file ignored by JSON store)"
+                name="image"
+                value={formData.image}
+                onChange={onFile}
+                accept="image/*"
+                disabled={disabled}
+              />
+              {imagePreview && (
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="mt-2 h-16 w-16 rounded object-cover border border-gray-200 dark:border-gray-700"
+                />
+              )}
+            </div>
+          </AdminForm>
         )}
-        {/* Note: Your store is JSON-only; newly picked File objects are ignored on submit. */}
       </div>
-    </AdminForm>
+    </PageLayout>
   );
 }

@@ -1,5 +1,4 @@
-// insex.jsx for services page
-
+// /src/pages/Services/index.jsx
 import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import ServiceForm from "./ServiceForm";
@@ -10,7 +9,8 @@ export default function Services() {
   const [showForm, setShowForm] = useState(false);
   const [editingService, setEditingService] = useState(null);
 
-  const isForm = location.pathname.includes('/form') || showForm;
+  // If we navigated to /services/form, or opened inline via state
+  const isForm = location.pathname.includes("/form") || showForm;
 
   const handleEdit = (service) => {
     setEditingService(service);
@@ -29,17 +29,12 @@ export default function Services() {
 
   if (isForm) {
     return (
-      <ServiceForm 
-        serviceId={editingService?.id} 
+      <ServiceForm
+        serviceId={editingService?.id}
         onSuccess={handleFormSuccess}
       />
     );
   }
 
-  return (
-    <ServiceList 
-      onEdit={handleEdit}
-      onAdd={handleAdd}
-    />
-  );
+  return <ServiceList onEdit={handleEdit} onAdd={handleAdd} />;
 }

@@ -60,7 +60,7 @@ export default function SubscriberList({ onAdd, onEdit }) {
       </PageHeader>
 
       {/* Table list like Session Plans */}
-      <main className="w-full px-4 pb-24">
+      <main className=" px-4 pb-24" style={{ minWidth: "1400px" }}>
         {error && (
           <div className="text-center text-red-600 mb-4">Failed to load subscribers.</div>
         )}

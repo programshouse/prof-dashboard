@@ -1,4 +1,3 @@
-// /src/pages/Services/ServiceList.jsx
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import PageLayout from "../../components/ui/PageLayout";
@@ -6,18 +5,9 @@ import PageHeader from "../../components/ui/PageHeader";
 import Button from "../../components/ui/button/Button";
 import Toaster, { notify } from "../../components/ui/Toaster/Toaster";
 import { useServicesStore } from "../../stores/useServicesStore";
-import ServiceCard from "../../components/ui/ServiceCard";
 
-// Build absolute URLs when API returns relative image paths
-const makeImageUrl = (path) => {
-  if (!path) return null;
-  if (/^(https?:|data:|\/\/)/i.test(path)) return path;
-  return `https://www.programshouse.com${path.startsWith("/") ? path : `/${path}`}`;
-};
-
-// ID helpers
-const getApiId = (svc) => svc?.id ?? svc?._id ?? svc?.uuid ?? null; // for API calls
-const getRouteId = (svc) => getApiId(svc) ?? (typeof svc?.slug === "string" ? svc.slug : null); // for /services/:id
+// Helpers
+const getApiId = (svc) => svc?.id ?? svc?._id ?? svc?.uuid ?? null;
 
 export default function ServiceList({ onEdit, onAdd }) {
   const navigate = useNavigate();
@@ -39,46 +29,45 @@ export default function ServiceList({ onEdit, onAdd }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Navigate to the single form page
+  const gotoForm = (id, { readonly = false } = {}) => {
+    const params = new URLSearchParams();
+    if (id) params.set("id", id);
+    if (readonly) params.set("readonly", "1");
+    navigate(`/services/form${params.toString() ? `?${params.toString()}` : ""}`);
+  };
+
   const handleShow = (svc) => {
-    const routeId = getRouteId(svc);
-    if (!routeId) {
-      notify.action("open").error("Missing service identifier");
-      return;
-    }
-    navigate(`/services/${routeId}`);
+    const id = getApiId(svc);
+    if (!id) { notify.action("open").error("Missing service id"); return; }
+    gotoForm(id, { readonly: true });
   };
 
   const handleEdit = (svc) => {
-    const apiId = getApiId(svc);
-    if (onEdit) {
-      onEdit(svc);
-      return;
-    }
-    if (!apiId) {
-      notify.action("edit").error("Missing service id");
-      return;
-    }
-    navigate(`/services/form?id=${apiId}`);
+    const id = getApiId(svc);
+    if (!id) { notify.action("edit").error("Missing service id"); return; }
+    // external handler (optional)
+    if (onEdit) { onEdit(svc); return; }
+    gotoForm(id, { readonly: false });
   };
 
   const handleDelete = async (svc) => {
-    const apiId = getApiId(svc);
-    if (!apiId) {
-      notify.action("delete").error("Missing service id");
-      return;
-    }
+    const id = getApiId(svc);
+    if (!id) { notify.action("delete").error("Missing service id"); return; }
+    if (!window.confirm(`Are you sure you want to delete "${svc?.title || "Service"}"?`)) return;
+
     try {
-      setDeletingIds((prev) => new Set(prev).add(apiId));
-      await removeService(apiId);
+      setDeletingIds((p) => new Set(p).add(id));
+      await removeService(id);
       notify.action("delete").success(`Deleted: ${svc?.title || "Service"}`);
     } catch (err) {
       console.error(err);
       notify.action("delete").error(err?.response?.data?.message || "Failed to delete service");
     } finally {
-      setDeletingIds((prev) => {
-        const next = new Set(prev);
-        next.delete(apiId);
-        return next;
+      setDeletingIds((p) => {
+        const n = new Set(p);
+        n.delete(id);
+        return n;
       });
     }
   };
@@ -102,11 +91,11 @@ export default function ServiceList({ onEdit, onAdd }) {
   return (
     <PageLayout title="Services Management | ProfMSE">
       <Toaster position="bottom-right" />
-
       <PageHeader
         title="Services Management"
         description="Manage services that appear on the website"
       >
+        {/* Top-right "Add New Service" */}
         {onAdd ? (
           <Button onClick={onAdd} variant="primary">+ Add New Service</Button>
         ) : (
@@ -122,10 +111,11 @@ export default function ServiceList({ onEdit, onAdd }) {
         {error ? ` • error: ${String(error)}` : ""}
       </div>
 
-      {/* Table list like Session Plans */}
-      <main className="w-full px-4 pb-24">
+      <main className="px-4 pb-24" style={{ minWidth: "1400px" }}>
         {error && (
-          <div className="text-center text-red-600 mb-4">Failed to load services. Check console & network tab.</div>
+          <div className="text-center text-red-600 mb-4">
+            Failed to load services. Check console & network tab.
+          </div>
         )}
 
         {!error && (!services || services.length === 0) ? (
@@ -154,29 +144,49 @@ export default function ServiceList({ onEdit, onAdd }) {
               </thead>
               <tbody>
                 {(services || []).map((svc) => {
-                  const apiId   = getApiId(svc);
-                  const routeId = getRouteId(svc);
-                  const title   = svc?.title ?? svc?.name ?? "Untitled Service";
-                  const desc    = (svc?.description ?? svc?.description_en ?? svc?.description_ar ?? "—").toString();
-                  const link    = svc?.link || "—";
-                  const isDeleting = apiId ? deletingIds.has(apiId) : false;
+                  const id   = getApiId(svc);
+                  const title = svc?.title ?? svc?.name ?? "Untitled Service";
+                  const desc  = (svc?.description ?? svc?.description_en ?? svc?.description_ar ?? "—").toString();
+                  const isDeleting = id ? deletingIds.has(id) : false;
 
                   return (
-                    <tr key={apiId || routeId || title} className="border-b last:border-b-0 border-brand-200 py-6 hover:bg-gray-50">
+                    <tr key={id || title} className="border-b last:border-b-0 border-brand-200 py-6 hover:bg-gray-50">
                       <td className="py-3 px-4">{title}</td>
-                      <td className="py-3 px-4">{desc}</td>
+                      <td className="py-3 px-4">
+                        <div className="max-w-[720px] line-clamp-2" title={desc}>{desc}</div>
+                      </td>
                       <td className="py-3 px-4">
                         {svc?.link ? (
-                          <a href={svc.link} target="_blank" rel="noreferrer" className="text-brand-600 underline">Open</a>
-                        ) : (
-                          "—"
-                        )}
+                          <a href={svc.link} target="_blank" rel="noreferrer" className="text-brand-600 underline break-all">
+                            Open
+                          </a>
+                        ) : ("—")}
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex flex-wrap gap-2">
-                          <Button variant="primary" onClick={() => handleShow(svc)} disabled={!routeId}>Show</Button>
-                          <Button variant="update" onClick={() => handleEdit(svc)} disabled={!apiId}>Edit</Button>
-                          <Button variant="delete" onClick={() => handleDelete(svc)} disabled={!apiId || isDeleting}>
+                          <Button
+                            variant="primary"
+                            onClick={() => handleShow(svc)}
+                            disabled={!id}
+                            className="cursor-pointer"
+                            aria-label={`Show ${title}`}
+                          >
+                            Show
+                          </Button>
+                          <Button
+                            variant="update"
+                            onClick={() => handleEdit(svc)}
+                            disabled={!id}
+                            aria-label={`Edit ${title}`}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            variant="delete"
+                            onClick={() => handleDelete(svc)}
+                            disabled={!id || isDeleting}
+                            aria-label={`Delete ${title}`}
+                          >
                             {isDeleting ? "Deleting…" : "Delete"}
                           </Button>
                         </div>
