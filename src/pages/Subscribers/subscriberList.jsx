@@ -6,9 +6,8 @@ import PageHeader from "../../components/ui/PageHeader";
 import Button from "../../components/ui/button/Button";
 import Toaster, { notify } from "../../components/ui/Toaster/Toaster";
 import { useSubscribersStore } from "../../stores/useSubscribersStore";
-import SubscriberCard from "../../components/ui/SubscriberCard";
 
-export default function SubscriberList({ onAdd, onEdit }) {
+export default function SubscriberList({ onAdd }) {
   const subscribers     = useSubscribersStore((s) => s.subscribers) || [];
   const loading         = useSubscribersStore((s) => s.loading);
   const error           = useSubscribersStore((s) => s.error);
@@ -50,6 +49,7 @@ export default function SubscriberList({ onAdd, onEdit }) {
       <Toaster position="bottom-right" />
 
       <PageHeader title="Subscribers" description="Manage newsletter subscribers">
+        {/* Top-right Add New (works with or without onAdd) */}
         {onAdd ? (
           <Button onClick={onAdd} variant="primary">+ Add Subscriber</Button>
         ) : (
@@ -59,8 +59,7 @@ export default function SubscriberList({ onAdd, onEdit }) {
         )}
       </PageHeader>
 
-      {/* Table list like Session Plans */}
-      <main className=" px-4 pb-24" style={{ minWidth: "1400px" }}>
+      <main className="px-4 pb-24" style={{ minWidth: "1400px" }}>
         {error && (
           <div className="text-center text-red-600 mb-4">Failed to load subscribers.</div>
         )}
@@ -73,8 +72,6 @@ export default function SubscriberList({ onAdd, onEdit }) {
               <thead className="bg-brand-25">
                 <tr className="text-left border-b border-brand-200">
                   <th className="py-3 px-4 font-semibold text-brand-700">Email</th>
-                  <th className="py-3 px-4 font-semibold text-brand-700">Name</th>
-                  <th className="py-3 px-4 font-semibold text-brand-700">Created</th>
                   <th className="py-3 px-4 font-semibold text-brand-700">Actions</th>
                 </tr>
               </thead>
@@ -92,17 +89,14 @@ export default function SubscriberList({ onAdd, onEdit }) {
                   (subscribers || []).map((s) => {
                     const id = s?.id || s?._id;
                     return (
-                      <tr key={id || s.email} className="border-b last:border-b-0 border-brand-200 py-6 hover:bg-gray-50">
+                      <tr
+                        key={id || s.email}
+                        className="border-b last:border-b-0 border-brand-200 py-6 hover:bg-gray-50"
+                      >
                         <td className="py-3 px-4">{s.email || "—"}</td>
-                        <td className="py-3 px-4">{s.name || s.fullName || "—"}</td>
-                        <td className="py-3 px-4">{s.createdAt ? new Date(s.createdAt).toLocaleString() : "—"}</td>
                         <td className="py-3 px-4">
                           <div className="flex flex-wrap gap-2">
-                            {onEdit && (
-                              <Button variant="update" onClick={() => onEdit(s)}>
-                                Edit
-                              </Button>
-                            )}
+                            {/* Delete only (no Edit) */}
                             <Button
                               variant="delete"
                               onClick={() => handleDelete(s)}

@@ -1,3 +1,4 @@
+// /src/stores/useWorkshopStore.js
 import { create } from "zustand";
 import axios from "axios";
 
@@ -8,6 +9,28 @@ const authHeaders = () => {
   const token = localStorage.getItem("access_token");
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
+
+// Helper: are we sending FormData?
+const isFormData = (v) =>
+  typeof FormData !== "undefined" && v instanceof FormData;
+
+// Build headers depending on body type
+const buildHeaders = (body) => {
+  const base = { ...authHeaders(), Accept: "application/json" };
+  if (isFormData(body)) {
+    // DO NOT set Content-Type; axios/browser will set the proper boundary
+    return base;
+  }
+  return { ...base, "Content-Type": "application/json" };
+};
+
+// Normalize list from different API shapes
+const toList = (data) =>
+  Array.isArray(data) ? data
+  : Array.isArray(data?.data) ? data.data
+  : Array.isArray(data?.items) ? data.items
+  : Array.isArray(data?.result) ? data.result
+  : [];
 
 export const useWorkshopStore = create((set, get) => ({
   workshops: [],
@@ -21,47 +44,53 @@ export const useWorkshopStore = create((set, get) => ({
   async createworkshop(body) {
     set({ loading: true, error: null });
     try {
-      const { data } = await api.post("", body, {
-        headers: { ...authHeaders(), "Content-Type": "application/json" },
-      });
+      const headers = buildHeaders(body);
+      const { data } = await api.post("", body, { headers });
       const created = data?.data ?? data;
       set({ createdworkshop: created, loading: false });
       await get().fetchworkshops();
       return created;
     } catch (err) {
-      set({ error: err?.response?.data?.message || "Failed to create workshop", loading: false });
+      set({
+        error: err?.response?.data?.message || "Failed to create workshop",
+        loading: false,
+      });
       throw err;
     }
   },
 
-  // UPDATE: PATCH /workshops/:id
-  // New explicit signature: updateworkshop(id, body)
+  // UPDATE: PATCH /workshops/:id  (explicit signature: updateworkshop(id, body))
   async updateworkshop(idOrObj, maybeBody) {
-    // Back-compat: allow updateworkshop({ id, ...fields })
-    const id = typeof idOrObj === "string" || typeof idOrObj === "number" ? idOrObj : idOrObj?.id;
+    const id =
+      typeof idOrObj === "string" || typeof idOrObj === "number"
+        ? idOrObj
+        : idOrObj?.id;
     const body = maybeBody ?? (typeof idOrObj === "object" ? idOrObj : {});
     if (!id) throw new Error("updateworkshop: missing id");
 
     set({ loading: true, error: null });
     try {
-      const { data } = await api.patch(`/${id}`, body, {
-        headers: { ...authHeaders(), "Content-Type": "application/json" },
-      });
+      const headers = buildHeaders(body);
+      const { data } = await api.patch(`/${id}`, body, { headers });
       const updated = data?.data ?? data;
       set({ updatedworkshop: updated, loading: false });
       await get().fetchworkshops();
       return updated;
     } catch (err) {
-      set({ error: err?.response?.data?.message || "Failed to update workshop", loading: false });
+      set({
+        error: err?.response?.data?.message || "Failed to update workshop",
+        loading: false,
+      });
       throw err;
     }
   },
 
   // DELETE: DELETE /workshops/:id
-  // New explicit signature: deleteworkshop(id)
   async deleteworkshop(idOrObj) {
-    // Back-compat: allow deleteworkshop({ id })
-    const id = typeof idOrObj === "string" || typeof idOrObj === "number" ? idOrObj : idOrObj?.id;
+    const id =
+      typeof idOrObj === "string" || typeof idOrObj === "number"
+        ? idOrObj
+        : idOrObj?.id;
     if (!id) throw new Error("deleteworkshop: missing id");
 
     set({ loading: true, error: null });
@@ -71,7 +100,10 @@ export const useWorkshopStore = create((set, get) => ({
       await get().fetchworkshops();
       return data?.data ?? data;
     } catch (err) {
-      set({ error: err?.response?.data?.message || "Failed to delete workshop", loading: false });
+      set({
+        error: err?.response?.data?.message || "Failed to delete workshop",
+        loading: false,
+      });
       throw err;
     }
   },
@@ -81,15 +113,14 @@ export const useWorkshopStore = create((set, get) => ({
     set({ loading: true, error: null });
     try {
       const { data } = await api.get("", { headers: authHeaders() });
-      const list =
-        Array.isArray(data) ? data :
-        Array.isArray(data?.data) ? data.data :
-        Array.isArray(data?.items) ? data.items :
-        Array.isArray(data?.result) ? data.result : [];
+      const list = toList(data);
       set({ workshops: list, loading: false });
       return list;
     } catch (err) {
-      set({ error: err?.response?.data?.message || "Failed to fetch workshops", loading: false });
+      set({
+        error: err?.response?.data?.message || "Failed to fetch workshops",
+        loading: false,
+      });
       throw err;
     }
   },
@@ -104,7 +135,10 @@ export const useWorkshopStore = create((set, get) => ({
       set({ workshop: svc, loading: false });
       return svc;
     } catch (err) {
-      set({ error: err?.response?.data?.message || "Failed to get workshop", loading: false });
+      set({
+        error: err?.response?.data?.message || "Failed to get workshop",
+        loading: false,
+      });
       throw err;
     }
   },

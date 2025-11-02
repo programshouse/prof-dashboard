@@ -36,13 +36,20 @@ export default function ProfileList({ onEdit }) {
     })();
   }, [fetchAll]);
 
+  // Open form (both Show and Edit go to editable form now)
+  const gotoForm = (row) => {
+    const id = getId(row);
+    navigate(`/profile/form${id ? `?id=${id}` : ""}`);
+  };
+
   const handleShow = (row) => {
-    navigate(`/profile/form${getId(row) ? `?id=${getId(row)}` : ""}&readonly=1`);
+    // Previously added readonly=1 — removed so it's editable
+    gotoForm(row);
   };
 
   const handleEdit = (row) => {
     if (onEdit) return onEdit(row);
-    navigate(`/profile/form${getId(row) ? `?id=${getId(row)}` : ""}`);
+    gotoForm(row);
   };
 
   const handleDelete = async (row) => {
@@ -69,9 +76,15 @@ export default function ProfileList({ onEdit }) {
       header: "Name",
       render: (row) => (
         <div className="min-w-0 max-w-[360px]">
-          <div className="font-medium text-gray-900 dark:text-gray-100 truncate">
+          {/* Make name clickable to edit */}
+          <button
+            type="button"
+            onClick={() => handleEdit(row)}
+            className="font-medium text-brand-600 hover:underline truncate text-left"
+            title="Open to edit"
+          >
             {row.title || "—"}
-          </div>
+          </button>
           <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
             ID: <span className="font-mono">{getId(row) || "—"}</span>
           </div>
@@ -114,7 +127,7 @@ export default function ProfileList({ onEdit }) {
         );
       },
     },
-  ], []);
+  ], []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) {
     return (
@@ -135,11 +148,6 @@ export default function ProfileList({ onEdit }) {
       {/* Fixed width wrapper */}
       <div className="mx-auto w-[1400px] max-w-[1400px] px-4">
         <PageHeader title="Profile List" description="Manage your professional profile">
-          {/* Top-left “Add New”: easiest is to place inside the header actions; it's visually top-right in most layouts.
-              If you literally want left-aligned, add a small toolbar below header. */}
-          <Link to="/profile/form">
-            <Button variant="primary">+ Add New</Button>
-          </Link>
         </PageHeader>
 
         <div className="overflow-x-auto rounded-xl border border-brand-200 bg-white dark:bg-gray-800 shadow">
@@ -147,11 +155,12 @@ export default function ProfileList({ onEdit }) {
             title="Profiles"
             data={rows}
             columns={columns}
-            onShow={(row) => handleShow(row)}
+            // Show now behaves like Edit (opens editable form)
+            onShow={(row) => handleEdit(row)}
             onEdit={(row) => handleEdit(row)}
             onDelete={(index) => rows[index] && handleDelete(rows[index])}
-            addText="+ Add New"
-            onAdd={() => navigate("/profile/form")}
+ 
+  
           />
         </div>
       </div>

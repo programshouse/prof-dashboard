@@ -6,8 +6,15 @@ import Button from "../../components/ui/button/Button";
 import Toaster, { notify } from "../../components/ui/Toaster/Toaster";
 import { useServicesStore } from "../../stores/useServicesStore";
 
-// Helpers
 const getApiId = (svc) => svc?.id ?? svc?._id ?? svc?.uuid ?? null;
+
+const ORIGIN = "https://www.programshouse.com";
+const makeAbsolute = (path) => {
+  if (!path) return "";
+  if (/^(https?:|data:|\/\/)/i.test(path)) return path;
+  if (path.startsWith("/")) return `${ORIGIN}${path}`;
+  return `${ORIGIN}/storage/${path}`;
+};
 
 export default function ServiceList({ onEdit, onAdd }) {
   const navigate = useNavigate();
@@ -29,7 +36,6 @@ export default function ServiceList({ onEdit, onAdd }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Navigate to the single form page
   const gotoForm = (id, { readonly = false } = {}) => {
     const params = new URLSearchParams();
     if (id) params.set("id", id);
@@ -46,7 +52,6 @@ export default function ServiceList({ onEdit, onAdd }) {
   const handleEdit = (svc) => {
     const id = getApiId(svc);
     if (!id) { notify.action("edit").error("Missing service id"); return; }
-    // external handler (optional)
     if (onEdit) { onEdit(svc); return; }
     gotoForm(id, { readonly: false });
   };
@@ -64,11 +69,7 @@ export default function ServiceList({ onEdit, onAdd }) {
       console.error(err);
       notify.action("delete").error(err?.response?.data?.message || "Failed to delete service");
     } finally {
-      setDeletingIds((p) => {
-        const n = new Set(p);
-        n.delete(id);
-        return n;
-      });
+      setDeletingIds((p) => { const n = new Set(p); n.delete(id); return n; });
     }
   };
 
@@ -91,11 +92,12 @@ export default function ServiceList({ onEdit, onAdd }) {
   return (
     <PageLayout title="Services Management | ProfMSE">
       <Toaster position="bottom-right" />
+
       <PageHeader
         title="Services Management"
         description="Manage services that appear on the website"
       >
-        {/* Top-right "Add New Service" */}
+        {/* TOP-RIGHT ADD NEW BUTTON */}
         {onAdd ? (
           <Button onClick={onAdd} variant="primary">+ Add New Service</Button>
         ) : (
@@ -104,12 +106,6 @@ export default function ServiceList({ onEdit, onAdd }) {
           </Link>
         )}
       </PageHeader>
-
-      {/* tiny debug strip — remove in prod */}
-      <div className="px-4 -mt-4 mb-4 text-xs text-gray-500">
-        count: {Array.isArray(services) ? services.length : 0}
-        {error ? ` • error: ${String(error)}` : ""}
-      </div>
 
       <main className="px-4 pb-24" style={{ minWidth: "1400px" }}>
         {error && (
@@ -136,6 +132,7 @@ export default function ServiceList({ onEdit, onAdd }) {
             <table className="min-w-full text-sm">
               <thead className="bg-brand-25">
                 <tr className="text-left border-b border-brand-200">
+                  <th className="py-3 px-4 font-semibold text-brand-700">Image</th>
                   <th className="py-3 px-4 font-semibold text-brand-700">Title</th>
                   <th className="py-3 px-4 font-semibold text-brand-700">Description</th>
                   <th className="py-3 px-4 font-semibold text-brand-700">Link</th>
@@ -144,13 +141,28 @@ export default function ServiceList({ onEdit, onAdd }) {
               </thead>
               <tbody>
                 {(services || []).map((svc) => {
-                  const id   = getApiId(svc);
+                  const id    = getApiId(svc);
                   const title = svc?.title ?? svc?.name ?? "Untitled Service";
                   const desc  = (svc?.description ?? svc?.description_en ?? svc?.description_ar ?? "—").toString();
+                  const img   = makeAbsolute(svc?.image || "");
                   const isDeleting = id ? deletingIds.has(id) : false;
 
                   return (
                     <tr key={id || title} className="border-b last:border-b-0 border-brand-200 py-6 hover:bg-gray-50">
+                      <td className="py-3 px-4">
+                        {img ? (
+                          <a href={img} target="_blank" rel="noreferrer" title="Open image">
+                            <img
+                              src={img}
+                              alt={title}
+                              className="h-10 w-10 rounded object-cover border border-gray-200"
+                              onError={(e) => { e.currentTarget.style.visibility = "hidden"; }}
+                            />
+                          </a>
+                        ) : (
+                          <span className="text-gray-300 text-xs">—</span>
+                        )}
+                      </td>
                       <td className="py-3 px-4">{title}</td>
                       <td className="py-3 px-4">
                         <div className="max-w-[720px] line-clamp-2" title={desc}>{desc}</div>
@@ -164,29 +176,9 @@ export default function ServiceList({ onEdit, onAdd }) {
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex flex-wrap gap-2">
-                          <Button
-                            variant="primary"
-                            onClick={() => handleShow(svc)}
-                            disabled={!id}
-                            className="cursor-pointer"
-                            aria-label={`Show ${title}`}
-                          >
-                            Show
-                          </Button>
-                          <Button
-                            variant="update"
-                            onClick={() => handleEdit(svc)}
-                            disabled={!id}
-                            aria-label={`Edit ${title}`}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            variant="delete"
-                            onClick={() => handleDelete(svc)}
-                            disabled={!id || isDeleting}
-                            aria-label={`Delete ${title}`}
-                          >
+                          <Button variant="primary" onClick={() => handleShow(svc)} disabled={!id}>Show</Button>
+                          <Button variant="update" onClick={() => handleEdit(svc)} disabled={!id}>Edit</Button>
+                          <Button variant="delete" onClick={() => handleDelete(svc)} disabled={!id || isDeleting}>
                             {isDeleting ? "Deleting…" : "Delete"}
                           </Button>
                         </div>

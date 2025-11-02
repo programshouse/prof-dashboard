@@ -1,5 +1,5 @@
 // /src/pages/Profile/ProfileForm.jsx
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import PageLayout from "../../components/ui/PageLayout";
 import PageHeader from "../../components/ui/PageHeader";
@@ -20,10 +20,7 @@ export default function ProfileForm({ onSuccess }) {
   const fetchAll = useWhoAmIStore((s) => s.fetchAll);
   const create   = useWhoAmIStore((s) => s.create);
   const update   = useWhoAmIStore((s) => s.update);
-  // try to pick a delete fn if your store has it under any common name
-  const destroy  = useWhoAmIStore(
-    (s) => s.delete ?? s.remove ?? s.deleteOne ?? s.destroy
-  );
+  const destroy  = useWhoAmIStore((s) => s.delete ?? s.remove ?? s.deleteOne ?? s.destroy);
 
   const [loading, setLoading] = useState(true);
   const [saving,  setSaving]  = useState(false);
@@ -37,6 +34,13 @@ export default function ProfileForm({ onSuccess }) {
     title: "", description: "", features: [], image: null, video: null, newFeatureDraft: ""
   });
 
+  // objectURL cleanup refs
+  const urlRefs = useRef({ img: null, vid: null });
+  const revoke = (k) => {
+    const u = urlRefs.current[k];
+    if (u) { URL.revokeObjectURL(u); urlRefs.current[k] = null; }
+  };
+
   // ---- load first whoami record as the profile
   useEffect(() => {
     (async () => {
@@ -49,8 +53,8 @@ export default function ProfileForm({ onSuccess }) {
           title: first?.title || "",
           description: first?.description || "",
           features: Array.isArray(first?.features) ? first.features : [],
-          image: first?.image || null,
-          video: first?.video || null,
+          image: first?.image || null, // can be URL string
+          video: first?.video || null, // can be URL string
         };
         setProfileData(clean);
         setFormData({ ...clean, newFeatureDraft: "" });
@@ -58,7 +62,12 @@ export default function ProfileForm({ onSuccess }) {
         setErr("Couldn't load profile. Try again.");
       } finally { setLoading(false); }
     })();
+
+    return () => { revoke("img"); revoke("vid"); };
   }, [fetchAll]);
+
+  // ---- helpers
+  const isFile = (x) => typeof File !== "undefined" && x instanceof File;
 
   // ---- handlers
   const onText = (e) => {
@@ -95,12 +104,21 @@ export default function ProfileForm({ onSuccess }) {
   const removeFeature = (i) =>
     setFormData((p) => ({ ...p, features: p.features.filter((_, idx) => idx !== i) }));
 
+  // Accept **all image formats** and **all video formats**
+  // (we keep it permissive on the client; backend will validate)
   const onFile = (e) => {
     const { name, files } = e.target;
     const file = files?.[0] || null;
     if (isReadOnly) return;
-    if (name === "image") setFormData((p) => ({ ...p, image: file, video: null }));
-    if (name === "video") setFormData((p) => ({ ...p, video: file, image: null }));
+
+    if (name === "image") {
+      setFormData((p) => ({ ...p, image: file, video: null }));
+      revoke("img");
+    }
+    if (name === "video") {
+      setFormData((p) => ({ ...p, video: file, image: null }));
+      revoke("vid");
+    }
   };
 
   const clearMedia = (k) => !isReadOnly && setFormData((p) => ({ ...p, [k]: null }));
@@ -127,22 +145,25 @@ export default function ProfileForm({ onSuccess }) {
     return isReadOnly ? false : (saving || Object.keys(vErrs).length > 0 || same);
   }, [profileData, formData, vErrs, saving, isReadOnly]);
 
-  // ---- submit (JSON-only)
-  const isFile = (x) => typeof File !== "undefined" && x instanceof File;
-
+  // ---- submit (JSON or File: store will turn File->FormData)
   const submit = async (e) => {
     e.preventDefault();
     if (isReadOnly) { onSuccess && onSuccess(); return; }
     if (disabled) return;
     try {
       setSaving(true); setErr("");
+
+      // Send an object; if it contains File values, your store
+      // (autoFormData) will convert to FormData and set proper headers.
       const body = {
         title: formData.title.trim(),
         description: formData.description.trim(),
         features: formData.features || [],
-        ...(typeof formData.image === "string" ? { image: formData.image } : {}),
-        ...(typeof formData.video === "string" ? { video: formData.video } : {}),
+        // include file or keep original string URL if present
+        ...(formData.image ? { image: formData.image } : {}),
+        ...(formData.video ? { video: formData.video } : {}),
       };
+
       if (profileData?.id) {
         await update(profileData.id, body);
       } else {
@@ -152,7 +173,9 @@ export default function ProfileForm({ onSuccess }) {
           setProfileData((p) => ({ ...p, id }));
         }
       }
-      setProfileData((p) => ({ ...p, ...body }));
+
+      // Persist simple fields locally; for media, keep whatever we sent
+      setProfileData((p) => ({ ...p, title: body.title, description: body.description, features: body.features }));
       onSuccess && onSuccess();
     } catch {
       setErr("Update failed. Please retry.");
@@ -176,11 +199,26 @@ export default function ProfileForm({ onSuccess }) {
     }
   };
 
-  // ---- previews
-  const imgURL = isFile(formData.image) ? URL.createObjectURL(formData.image) :
-                 typeof formData.image === "string" ? formData.image : null;
-  const vidURL = isFile(formData.video) ? URL.createObjectURL(formData.video) :
-                 typeof formData.video === "string" ? formData.video : null;
+  // ---- previews (support all image/video; create objectURL for Files)
+  const imgURL = (() => {
+    if (isFile(formData.image)) {
+      revoke("img");
+      const u = URL.createObjectURL(formData.image);
+      urlRefs.current.img = u;
+      return u;
+    }
+    return typeof formData.image === "string" ? formData.image : null;
+  })();
+
+  const vidURL = (() => {
+    if (isFile(formData.video)) {
+      revoke("vid");
+      const u = URL.createObjectURL(formData.video);
+      urlRefs.current.vid = u;
+      return u;
+    }
+    return typeof formData.video === "string" ? formData.video : null;
+  })();
 
   if (loading) {
     return (
@@ -204,7 +242,6 @@ export default function ProfileForm({ onSuccess }) {
           title={`${isReadOnly ? "View" : "Edit"} Profile`}
           description="Keep your professional profile clear and up to date."
         >
-          {/* Top-left Add New (in header left is not built-in; we show useful actions on the right) */}
           {!!profileData?.id && !isReadOnly && (
             <Button variant="danger" onClick={doDelete} disabled={saving} className="mr-3">
               {saving ? "Deleting…" : "Delete"}
@@ -363,7 +400,14 @@ export default function ProfileForm({ onSuccess }) {
             {/* Media (image OR video) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
               <div className={formData.video ? "opacity-50 pointer-events-none" : ""}>
-                <FileUpload label="Profile Image" name="image" value={formData.image} onChange={onFile} accept="image/*" disabled={isReadOnly} />
+                <FileUpload
+                  label="Profile Image"
+                  name="image"
+                  value={formData.image}
+                  onChange={onFile}
+                  accept="image/*"           // accept ALL image formats
+                  disabled={isReadOnly}
+                />
                 {formData.image && (
                   <div className="mt-2 relative">
                     {imgURL ? <img src={imgURL} alt="preview" className="h-44 w-full object-cover rounded-lg border" /> : null}
@@ -381,7 +425,14 @@ export default function ProfileForm({ onSuccess }) {
               </div>
 
               <div className={formData.image ? "opacity-50 pointer-events-none" : ""}>
-                <FileUpload label="Profile Video" name="video" value={formData.video} onChange={onFile} accept="video/*" disabled={isReadOnly} />
+                <FileUpload
+                  label="Profile Video"
+                  name="video"
+                  value={formData.video}
+                  onChange={onFile}
+                  accept="video/*"           // accept ALL video formats
+                  disabled={isReadOnly}
+                />
                 {formData.video && (
                   <div className="mt-2 relative">
                     {vidURL ? <video src={vidURL} controls className="h-44 w-full rounded-lg border" /> : null}
