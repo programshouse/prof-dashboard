@@ -100,29 +100,31 @@ export default function SettingsList({ onEdit }) {
   );
 
   return (
-    <PageLayout title="Site Settings | ProfMSE">
+    <div title="Site Settings | ProfMSE">
       <Toaster position="bottom-right" />
 
-      {/* Fixed width container (1400px) */}
-      <div className="mx-auto w-[1400px] max-w-[1400px] px-4">
+      {/* Responsive container */}
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <PageHeader
           title="Site Settings"
           description="View and manage site contact/info settings"
         >
           {/* Top-right Add New */}
-          <Link to="/settings/form">
-            <Button variant="primary">+ Add New</Button>
-          </Link>
-          {settings && (
-            <>
-              <Button className="ml-3" variant="update" onClick={() => handleEdit(settings)}>
-                Edit
-              </Button>
-              <Button className="ml-3" variant="danger" onClick={handleDelete} disabled={deleting}>
-                {deleting ? "Deleting…" : "Delete"}
-              </Button>
-            </>
-          )}
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+            <Link to="/settings/form">
+              <Button variant="primary" className="w-full sm:w-auto">+ Add New</Button>
+            </Link>
+            {settings && (
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                <Button variant="update" onClick={() => handleEdit(settings)} className="w-full sm:w-auto">
+                  Edit
+                </Button>
+                <Button variant="danger" onClick={handleDelete} disabled={deleting} className="w-full sm:w-auto">
+                  {deleting ? "Deleting…" : "Delete"}
+                </Button>
+              </div>
+            )}
+          </div>
         </PageHeader>
 
         <main className="w-full pb-24">
@@ -137,7 +139,7 @@ export default function SettingsList({ onEdit }) {
           )}
 
           {!loading && !error && data.length === 0 && (
-            <div className="text-center text-brand-600">
+            <div className="text-center text-brand-600 px-4">
               No settings found. Click <strong>Add New</strong> to create.
             </div>
           )}
@@ -158,6 +160,6 @@ export default function SettingsList({ onEdit }) {
           )}
         </main>
       </div>
-    </PageLayout>
+    </div>
   );
 }

@@ -340,7 +340,7 @@ export default function WorkshopForm({ onSuccess, workshopId }) {
   if (loading) {
     return (
       <PageLayout title="Workshop Management | ProfMSE">
-        <div className="mx-auto w-[1400px] max-w-[1400px] px-4">
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <PageHeader title="Workshop Management" description="Manage workshops" />
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500 mx-auto" />
@@ -358,8 +358,8 @@ export default function WorkshopForm({ onSuccess, workshopId }) {
     : "border-gray-300";
 
   return (
-    <PageLayout title={`${isReadOnly ? "View" : form.id ? "Edit" : "Add"} Workshop | ProfMSE`}>
-      <div className="mx-auto w-[1400px] max-w-[1400px] px-4">
+    <div title={`${isReadOnly ? "View" : form.id ? "Edit" : "Add"} Workshop | ProfMSE`}>
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <PageHeader
           title={`${isReadOnly ? "View" : form.id ? "Edit" : "Add"} Workshop`}
           description="Keep workshops up to date."
@@ -564,6 +564,6 @@ export default function WorkshopForm({ onSuccess, workshopId }) {
           </AdminForm>
         </div>
       </div>
-    </PageLayout>
+    </div>
   );
 }

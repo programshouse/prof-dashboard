@@ -60,25 +60,59 @@ export const useServicesStore = create((set, get) => ({
     }
   },
 
-  async updateService(idOrObj, maybeBody) {
-    const id = typeof idOrObj === "string" || typeof idOrObj === "number" ? idOrObj : idOrObj?.id;
-    const body = maybeBody ?? (typeof idOrObj === "object" ? idOrObj : {});
-    if (!id) throw new Error("updateService: missing id");
+async updateService(idOrObj, maybeBody) {
+  const id =
+    typeof idOrObj === "string" || typeof idOrObj === "number"
+      ? idOrObj
+      : idOrObj?.id;
 
-    set({ loading: true, error: null });
-    try {
-      const payload = autoFormData(body);
-      const headers = buildHeaders(payload);
-      const { data } = await api.patch(`/${id}`, payload, { headers });
-      const updated = data?.data ?? data;
-      set({ updatedService: updated, loading: false });
-      await get().fetchServices();
-      return updated;
-    } catch (err) {
-      set({ error: err?.response?.data?.message || "Failed to update service", loading: false });
-      throw err;
+  const body = maybeBody ?? (typeof idOrObj === "object" ? idOrObj : {});
+  if (!id) throw new Error("updateService: missing id");
+
+  set({ loading: true, error: null });
+  try {
+    // IMPORTANT:
+    // - If body has File => send multipart using POST + _method=PATCH
+    // - If no File => send JSON with PATCH (fast)
+    const payload = autoFormData(body);
+
+    let res;
+
+    if (isFormData(payload)) {
+      // Laravel-friendly: method override
+      payload.append("_method", "PATCH");
+
+      res = await api.post(`/${id}`, payload, {
+        headers: {
+          ...authHeaders(),
+          Accept: "application/json",
+          // DO NOT set Content-Type here (browser will set boundary)
+        },
+      });
+    } else {
+      res = await api.patch(`/${id}`, payload, {
+        headers: {
+          ...authHeaders(),
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      });
     }
-  },
+
+    const data = res?.data;
+    const updated = data?.data ?? data;
+
+    set({ updatedService: updated, loading: false });
+    await get().fetchServices();
+    return updated;
+  } catch (err) {
+    set({
+      error: err?.response?.data?.message || "Failed to update service",
+      loading: false,
+    });
+    throw err;
+  }
+},
 
   async deleteService(idOrObj) {
     const id = typeof idOrObj === "string" || typeof idOrObj === "number" ? idOrObj : idOrObj?.id;

@@ -64,7 +64,7 @@ export default function SubscriberForm({ subscriberId, initialValues, onSuccess 
   return (
     <PageLayout title={subscriberId ? "Edit Subscriber | ProfMSE" : "Add Subscriber | ProfMSE"}>
       {/* 1400px fixed-width wrapper for EVERYTHING */}
-      <div className="mx-auto w-[1400px] max-w-[1400px]">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <PageHeader title={subscriberId ? "Edit Subscriber" : "Add Subscriber"} />
         {loading ? (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 text-center">

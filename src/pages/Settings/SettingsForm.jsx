@@ -1,22 +1,33 @@
 // /src/pages/Settings/SettingsForm.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import PageLayout from "../../components/ui/PageLayout";
 import PageHeader from "../../components/ui/PageHeader";
 import AdminForm from "../../components/ui/AdminForm";
+import Toaster, { notify } from "../../components/ui/Toaster/Toaster";
 import { useSettingsStore } from "../../stores/useSettingsStore";
 
 // Stable, memoized row to prevent unmount/mount on each keystroke (preserves input focus)
-const SocialRow = React.memo(function SocialRow({ label, value, onChange, disabled }) {
+const SocialRow = React.memo(function SocialRow({
+  label,
+  value,
+  onChange,
+  disabled,
+}) {
   return (
     <div className="flex items-center gap-3">
       <span className="flex h-10 w-28 items-center justify-start text-sm font-medium text-gray-700 dark:text-gray-300">
         {label}
       </span>
+
       <input
         type="url"
         inputMode="url"
-        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white ${disabled ? "bg-gray-100 dark:bg-gray-800 cursor-not-allowed border-gray-200 dark:border-gray-700" : "border-gray-300"}`}
+        placeholder="https://"
+        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
+          disabled
+            ? "bg-gray-100 dark:bg-gray-800 cursor-not-allowed border-gray-200 dark:border-gray-700"
+            : "border-gray-300"
+        }`}
         value={value}
         onChange={(e) => !disabled && onChange(e.target.value)}
         disabled={disabled}
@@ -30,11 +41,11 @@ export default function SettingsForm({ onSuccess }) {
   const isReadOnly =
     searchParams.get("readonly") === "1" || searchParams.get("mode") === "view";
 
-  const loading   = useSettingsStore((s) => s.loading);
-  const settings  = useSettingsStore((s) => s.settings);
-  const error     = useSettingsStore((s) => s.error);
+  const loading = useSettingsStore((s) => s.loading);
+  const settings = useSettingsStore((s) => s.settings);
+  const error = useSettingsStore((s) => s.error);
 
-  const fetchSettings  = useSettingsStore((s) => s.fetchSettings);
+  const fetchSettings = useSettingsStore((s) => s.fetchSettings);
   const updateSettings = useSettingsStore((s) => s.updateSettings);
 
   const [saving, setSaving] = useState(false);
@@ -43,11 +54,19 @@ export default function SettingsForm({ onSuccess }) {
     email: "",
     phone: "",
     address: "",
-    socials: { facebook: "", whatsapp: "", instagram: "", twitter: "", linkedin: "" },
+    socials: {
+      facebook: "",
+      whatsapp: "",
+      instagram: "",
+      twitter: "",
+      linkedin: "",
+    },
   });
 
-  // Seed with existing (previous) settings
+  // Seed with existing settings
   const seed = (data) => {
+    if (!data) return;
+
     setForm({
       siteName: data?.siteName || data?.site_name || "",
       email: data?.email || "",
@@ -63,41 +82,50 @@ export default function SettingsForm({ onSuccess }) {
     });
   };
 
+  // Load once then seed (single effect to avoid double seeding)
   useEffect(() => {
-    // Ensure settings are loaded once, then seed.
     if (!settings) {
       fetchSettings().catch((e) => console.error("fetchSettings", e));
-    } else {
-      seed(settings);
+      return;
     }
-  }, []);
-
-  useEffect(() => {
-    if (settings) seed(settings);
+    seed(settings);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
 
-  const setField  = (name, value) => setForm((p) => ({ ...p, [name]: value }));
-  const setSocial = (k, v) => setForm((p) => ({ ...p, socials: { ...p.socials, [k]: v } }));
+  const setField = (name, value) => setForm((p) => ({ ...p, [name]: value }));
+  const setSocial = (k, v) =>
+    setForm((p) => ({ ...p, socials: { ...p.socials, [k]: v } }));
 
-  const valid = useMemo(
-    () =>
-      form.siteName.trim() &&
-      /\S+@\S+\.\S+/.test(form.email) &&
-      form.phone.trim() &&
-      form.address.trim(),
-    [form]
-  );
+  // ✅ Validation: must be non-empty + valid email
+  const valid = useMemo(() => {
+    const okEmail = /\S+@\S+\.\S+/.test(form.email);
+    return (
+      form.siteName.trim().length > 0 &&
+      okEmail &&
+      form.phone.trim().length > 0 &&
+      form.address.trim().length > 0
+    );
+  }, [form]);
 
   const submit = async (e) => {
     e.preventDefault();
-    if (isReadOnly) { onSuccess && onSuccess(); return; } // Close in view-only
+
+    // View-only: allow closing
+    if (isReadOnly) {
+      onSuccess && onSuccess();
+      return;
+    }
+
     if (!valid) return;
+
     try {
       setSaving(true);
-      await updateSettings({ ...form });
+      await updateSettings(form);
+      notify.action("update").success("Settings updated successfully");
       onSuccess && onSuccess();
-    } catch {
-      alert("Failed to save settings.");
+    } catch (err) {
+      console.error("Failed to save settings:", err);
+      notify.action("update").error("Failed to save settings");
     } finally {
       setSaving(false);
     }
@@ -110,10 +138,21 @@ export default function SettingsForm({ onSuccess }) {
     ? "bg-gray-100 dark:bg-gray-800 cursor-not-allowed border-gray-200 dark:border-gray-700"
     : "border-gray-300";
 
+  // Helper: show why button is disabled (only in edit mode)
+  const validationHint = useMemo(() => {
+    if (isReadOnly) return "";
+    if (!form.siteName.trim()) return "Please enter Site Name.";
+    if (!/\S+@\S+\.\S+/.test(form.email)) return "Please enter a valid Email.";
+    if (!form.phone.trim()) return "Please enter Phone.";
+    if (!form.address.trim()) return "Please enter Address.";
+    return "";
+  }, [form, isReadOnly]);
+
   return (
-    <PageLayout title={`${isReadOnly ? "View" : "Edit"} Settings | ProfMSE`}>
-      {/* Fixed width container (1400px) */}
-      <div className="mx-auto w-[1400px] max-w-[1400px] px-4">
+    <div title={`${isReadOnly ? "View" : "Edit"} Settings | ProfMSE`}>
+      <Toaster position="bottom-right" />
+
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <PageHeader title={`${isReadOnly ? "View" : "Edit"} Settings`} />
 
         {/* Loading / Error */}
@@ -122,6 +161,7 @@ export default function SettingsForm({ onSuccess }) {
             Loading settings…
           </div>
         )}
+
         {!loading && error && (
           <div className="text-center text-red-600">{String(error)}</div>
         )}
@@ -132,9 +172,7 @@ export default function SettingsForm({ onSuccess }) {
             title="Site Information"
             onSubmit={submit}
             onCancel={onSuccess}
-            submitText={
-              isReadOnly ? "Close" : saving ? "Saving..." : "Save Settings"
-            }
+            submitText={isReadOnly ? "Close" : saving ? "Saving..." : "Save Settings"}
             submitDisabled={isReadOnly ? false : saving || !valid}
           >
             {/* Basic Info */}
@@ -152,7 +190,9 @@ export default function SettingsForm({ onSuccess }) {
                   maxLength={140}
                   disabled={isReadOnly}
                 />
-                <p className="text-xs text-gray-500 mt-1">{form.siteName.length}/140</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {form.siteName.length}/140
+                </p>
               </div>
 
               <div>
@@ -200,16 +240,51 @@ export default function SettingsForm({ onSuccess }) {
 
             {/* Socials */}
             <div className="mt-6 space-y-4">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Social Links</h3>
-              <SocialRow label="Facebook" value={form.socials.facebook} onChange={(v) => setSocial("facebook", v)} disabled={isReadOnly} />
-              <SocialRow label="WhatsApp" value={form.socials.whatsapp} onChange={(v) => setSocial("whatsapp", v)} disabled={isReadOnly} />
-              <SocialRow label="Instagram" value={form.socials.instagram} onChange={(v) => setSocial("instagram", v)} disabled={isReadOnly} />
-              <SocialRow label="Twitter" value={form.socials.twitter} onChange={(v) => setSocial("twitter", v)} disabled={isReadOnly} />
-              <SocialRow label="LinkedIn" value={form.socials.linkedin} onChange={(v) => setSocial("linkedin", v)} disabled={isReadOnly} />
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                Social Links
+              </h3>
+
+              <SocialRow
+                label="Facebook"
+                value={form.socials.facebook}
+                onChange={(v) => setSocial("facebook", v)}
+                disabled={isReadOnly}
+              />
+              <SocialRow
+                label="WhatsApp"
+                value={form.socials.whatsapp}
+                onChange={(v) => setSocial("whatsapp", v)}
+                disabled={isReadOnly}
+              />
+              <SocialRow
+                label="Instagram"
+                value={form.socials.instagram}
+                onChange={(v) => setSocial("instagram", v)}
+                disabled={isReadOnly}
+              />
+              <SocialRow
+                label="Twitter"
+                value={form.socials.twitter}
+                onChange={(v) => setSocial("twitter", v)}
+                disabled={isReadOnly}
+              />
+              <SocialRow
+                label="LinkedIn"
+                value={form.socials.linkedin}
+                onChange={(v) => setSocial("linkedin", v)}
+                disabled={isReadOnly}
+              />
             </div>
+
+            {/* ✅ Show why save is disabled */}
+            {!isReadOnly && !valid && (
+              <div className="mt-4 text-sm text-amber-600 dark:text-amber-400">
+                {validationHint}
+              </div>
+            )}
           </AdminForm>
         )}
       </div>
-    </PageLayout>
+    </div>
   );
 }

@@ -12,19 +12,26 @@ export const useSidebar = () => {
 export const SidebarProvider = ({ children }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+
+  // "mobileOrTablet" => anything < lg (1024)
   const [isMobile, setIsMobile] = useState(false);
+
   const [isHovered, setIsHovered] = useState(false);
   const [activeItem, setActiveItem] = useState(null);
   const [openSubmenu, setOpenSubmenu] = useState(null);
 
-  // Determine mobile on mount + resize (guard for SSR)
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     const handleResize = () => {
-      const mobile = window.innerWidth < 768;
-      setIsMobile(mobile);
-      if (!mobile) setIsMobileOpen(false);
+      const mobileOrTablet = window.innerWidth < 1024; // lg breakpoint
+      setIsMobile(mobileOrTablet);
+
+      // close mobile drawer when switching to desktop
+      if (!mobileOrTablet) setIsMobileOpen(false);
+
+      // collapse sidebar on mobile/tablet
+      if (mobileOrTablet) setIsHovered(false);
     };
 
     handleResize();
@@ -34,14 +41,18 @@ export const SidebarProvider = ({ children }) => {
 
   const toggleSidebar = () => setIsExpanded((prev) => !prev);
   const toggleMobileSidebar = () => setIsMobileOpen((prev) => !prev);
+
   const toggleSubmenu = (item) =>
     setOpenSubmenu((prev) => (prev === item ? null : item));
 
-  // Memoize to avoid unnecessary re-renders
-  const value = useMemo(
-    () => ({
-      isExpanded: isMobile ? false : isExpanded,
+  const value = useMemo(() => {
+    // on mobile/tablet we want icons-only => no expanded state
+    const effectiveExpanded = isMobile ? false : isExpanded;
+
+    return {
+      isExpanded: effectiveExpanded,
       isMobileOpen,
+      isMobile, // <-- this now means mobile+tablet
       isHovered,
       activeItem,
       openSubmenu,
@@ -50,9 +61,10 @@ export const SidebarProvider = ({ children }) => {
       setIsHovered,
       setActiveItem,
       toggleSubmenu,
-    }),
-    [isMobile, isExpanded, isMobileOpen, isHovered, activeItem, openSubmenu]
-  );
+    };
+  }, [isMobile, isExpanded, isMobileOpen, isHovered, activeItem, openSubmenu]);
 
-  return <SidebarContext.Provider value={value}>{children}</SidebarContext.Provider>;
+  return (
+    <SidebarContext.Provider value={value}>{children}</SidebarContext.Provider>
+  );
 };

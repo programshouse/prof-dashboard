@@ -78,7 +78,6 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
       return u;
     }
     return form.imageExistingUrl || "";
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.imageFile, form.imageExistingUrl]);
 
   // Validation
@@ -136,7 +135,8 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
         title: form.title.trim(),
         description: form.description.trim(),
         link: form.link?.trim() || "",
-        ...(form.imageFile instanceof File ? { image: form.imageFile } : {}), // key: "image" as expected by backend
+        // Only send image if new file is selected, otherwise don't send image field to preserve existing
+        ...(form.imageFile instanceof File ? { image: form.imageFile } : {}),
       };
 
       if (serviceId) await updateService(serviceId, body);
@@ -160,8 +160,8 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
     : "border-gray-300";
 
   return (
-    <PageLayout title={`${isReadOnly ? "View" : serviceId ? "Edit" : "Add"} Service | ProfMSE`}>
-      <div className="mx-auto w-[1400px] max-w-[1400px] px-4">
+    <div title={`${isReadOnly ? "View" : serviceId ? "Edit" : "Add"} Service | ProfMSE`}>
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <PageHeader title={`${isReadOnly ? "View" : serviceId ? "Edit" : "Add"} Service`} />
 
         {loading ? (
@@ -266,6 +266,6 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
           </AdminForm>
         )}
       </div>
-    </PageLayout>
+    </div>
   );
 }

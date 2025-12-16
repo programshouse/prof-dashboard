@@ -10,13 +10,31 @@ const authHeaders = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
+// --- helpers to support File uploads ---
+const isFileLike = (v) =>
+  (typeof File !== "undefined" && v instanceof File) ||
+  (typeof Blob !== "undefined" && v instanceof Blob);
+
 const isFormData = (v) =>
   typeof FormData !== "undefined" && v instanceof FormData;
 
-const buildHeaders = (body) => {
+const autoFormData = (body) => {
+  if (!body || typeof body !== "object" || isFormData(body)) return body;
+  let hasFile = false;
+  for (const k in body) if (isFileLike(body[k])) { hasFile = true; break; }
+  if (!hasFile) return body;
+
+  const fd = new FormData();
+  Object.entries(body).forEach(([k, v]) => {
+    if (Array.isArray(v)) v.forEach((it) => fd.append(`${k}[]`, it));
+    else if (v !== undefined && v !== null) fd.append(k, v);
+  });
+  return fd;
+};
+
+const buildHeaders = (payload) => {
   const base = { ...authHeaders(), Accept: "application/json" };
-  if (isFormData(body)) return base; // let browser set boundary
-  return { ...base, "Content-Type": "application/json" };
+  return isFormData(payload) ? base : { ...base, "Content-Type": "application/json" };
 };
 
 const toList = (data) =>
@@ -52,31 +70,59 @@ export const useWorkshopStore = create((set, get) => ({
     }
   },
 
-  async updateworkshop(idOrObj, maybeBody) {
-    const id =
-      typeof idOrObj === "string" || typeof idOrObj === "number"
-        ? idOrObj
-        : idOrObj?.id;
+async updateworkshop(idOrObj, maybeBody) {
+  const id =
+    typeof idOrObj === "string" || typeof idOrObj === "number"
+      ? idOrObj
+      : idOrObj?.id;
 
-    const body = maybeBody ?? (typeof idOrObj === "object" ? idOrObj : {});
-    if (!id) throw new Error("updateworkshop: missing id");
+  const body = maybeBody ?? (typeof idOrObj === "object" ? idOrObj : {});
+  if (!id) throw new Error("updateworkshop: missing id");
 
-    set({ loading: true, error: null });
-    try {
-      const headers = buildHeaders(body);
-      const { data } = await api.patch(`/${id}`, body, { headers });
-      const updated = data?.data ?? data;
-      set({ updatedworkshop: updated, loading: false });
-      await get().fetchworkshops();
-      return updated;
-    } catch (err) {
-      set({
-        error: err?.response?.data?.message || "Failed to update workshop",
-        loading: false,
+  set({ loading: true, error: null });
+  try {
+    // convert to FormData only if there is a File/Blob
+    const payload = autoFormData(body);
+
+    let res;
+
+    if (isFormData(payload)) {
+      // Laravel-friendly: method override for multipart updates
+      payload.append("_method", "PATCH");
+
+      res = await api.post(`/${id}`, payload, {
+        headers: {
+          ...authHeaders(),
+          Accept: "application/json",
+          // don't set Content-Type (browser sets boundary)
+        },
       });
-      throw err;
+    } else {
+      // normal JSON patch
+      res = await api.patch(`/${id}`, payload, {
+        headers: {
+          ...authHeaders(),
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      });
     }
-  },
+
+    const data = res?.data;
+    const updated = data?.data ?? data;
+
+    set({ updatedworkshop: updated, loading: false });
+    await get().fetchworkshops();
+    return updated;
+  } catch (err) {
+    set({
+      error: err?.response?.data?.message || "Failed to update workshop",
+      loading: false,
+    });
+    throw err;
+  }
+},
+
 
   async deleteworkshop(idOrObj) {
     const id =
