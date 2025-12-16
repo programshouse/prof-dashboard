@@ -1,3 +1,4 @@
+// /src/stores/useBlogStore.js
 import { create } from "zustand";
 import axios from "axios";
 
@@ -9,6 +10,14 @@ const authHeaders = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
+const normalizeList = (data) => {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.items)) return data.items;
+  if (Array.isArray(data?.result)) return data.result;
+  return [];
+};
+
 export const useBlogsStore = create((set, get) => ({
   Blogs: [],
   Blog: null,
@@ -17,14 +26,19 @@ export const useBlogsStore = create((set, get) => ({
   createdBlog: null,
   updatedBlog: null,
 
-  // CREATE: POST /Blogs
+  // CREATE: POST /blogs  (multipart supported)
   async createBlog(body) {
     set({ loading: true, error: null });
     try {
-      const { data } = await api.post("", body, {
-        headers: { ...authHeaders(), "Content-Type": "application/json" },
-      });
+      const isFormData = body instanceof FormData;
+      const headers = {
+        ...authHeaders(),
+        ...(isFormData ? {} : { "Content-Type": "application/json" }),
+      };
+
+      const { data } = await api.post("", body, { headers });
       const created = data?.data ?? data;
+
       set({ createdBlog: created, loading: false });
       await get().fetchBlogs();
       return created;
@@ -34,20 +48,36 @@ export const useBlogsStore = create((set, get) => ({
     }
   },
 
-  // UPDATE: PATCH /Blogs/:id
-  // New explicit signature: updateBlog(id, body)
-  async updateBlog(idOrObj, maybeBody) {
-    // Back-compat: allow updateBlog({ id, ...fields })
-    const id = typeof idOrObj === "string" || typeof idOrObj === "number" ? idOrObj : idOrObj?.id;
+  // UPDATE: PATCH /blogs/:id
+  // If multipart => prefer POST + _method=PATCH (Laravel safe)
+  async updateBlog(idOrObj, maybeBody, opts = {}) {
+    const id =
+      typeof idOrObj === "string" || typeof idOrObj === "number"
+        ? idOrObj
+        : idOrObj?.id;
+
     const body = maybeBody ?? (typeof idOrObj === "object" ? idOrObj : {});
     if (!id) throw new Error("updateBlog: missing id");
 
     set({ loading: true, error: null });
     try {
-      const { data } = await api.patch(`/${id}`, body, {
-        headers: { ...authHeaders(), "Content-Type": "application/json" },
-      });
-      const updated = data?.data ?? data;
+      const isFormData = body instanceof FormData;
+      const headers = {
+        ...authHeaders(),
+        ...(isFormData ? {} : { "Content-Type": "application/json" }),
+      };
+
+      let res;
+
+      if (opts.forcePost && isFormData) {
+        // IMPORTANT: body should already contain _method=PATCH
+        res = await api.post(`/${id}`, body, { headers });
+      } else {
+        res = await api.patch(`/${id}`, body, { headers });
+      }
+
+      const updated = res.data?.data ?? res.data;
+
       set({ updatedBlog: updated, loading: false });
       await get().fetchBlogs();
       return updated;
@@ -57,11 +87,12 @@ export const useBlogsStore = create((set, get) => ({
     }
   },
 
-  // DELETE: DELETE /Blogs/:id
-  // New explicit signature: deleteBlog(id)
+  // DELETE: DELETE /blogs/:id
   async deleteBlog(idOrObj) {
-    // Back-compat: allow deleteBlog({ id })
-    const id = typeof idOrObj === "string" || typeof idOrObj === "number" ? idOrObj : idOrObj?.id;
+    const id =
+      typeof idOrObj === "string" || typeof idOrObj === "number"
+        ? idOrObj
+        : idOrObj?.id;
     if (!id) throw new Error("deleteBlog: missing id");
 
     set({ loading: true, error: null });
@@ -76,16 +107,12 @@ export const useBlogsStore = create((set, get) => ({
     }
   },
 
-  // LIST: GET /Blogs
+  // LIST: GET /blogs
   async fetchBlogs() {
     set({ loading: true, error: null });
     try {
       const { data } = await api.get("", { headers: authHeaders() });
-      const list =
-        Array.isArray(data) ? data :
-        Array.isArray(data?.data) ? data.data :
-        Array.isArray(data?.items) ? data.items :
-        Array.isArray(data?.result) ? data.result : [];
+      const list = normalizeList(data);
       set({ Blogs: list, loading: false });
       return list;
     } catch (err) {
@@ -94,15 +121,15 @@ export const useBlogsStore = create((set, get) => ({
     }
   },
 
-  // SHOW: GET /Blogs/:id
+  // SHOW: GET /blogs/:id
   async fetchBlogById(id) {
     if (!id) throw new Error("fetchBlogById: missing id");
     set({ loading: true, error: null });
     try {
       const { data } = await api.get(`/${id}`, { headers: authHeaders() });
-      const svc = data?.data ?? data;
-      set({ Blog: svc, loading: false });
-      return svc;
+      const blog = data?.data ?? data;
+      set({ Blog: blog, loading: false });
+      return blog;
     } catch (err) {
       set({ error: err?.response?.data?.message || "Failed to get Blog", loading: false });
       throw err;

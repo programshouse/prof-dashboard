@@ -1,6 +1,6 @@
 // /src/pages/Blogs/BlogFormTiny.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";            // 👈 add this
+import { useSearchParams } from "react-router-dom";
 import AdminForm from "../../components/ui/AdminForm";
 import FileUpload from "../../components/ui/FileUpload";
 import { useBlogsStore } from "../../stores/useBlogStore.js";
@@ -12,84 +12,126 @@ export default function BlogFormTiny({
   apiKey = "lmml35k9i4dyhe5swfgxoufuqhwpbcqgz25m38779fehig9r",
   readOnly: readOnlyProp,
 }) {
-  const [searchParams] = useSearchParams();                    // 👈
-  const resolvedId = blogId ?? searchParams.get("id");         // 👈 use URL id if prop missing
+  const [searchParams] = useSearchParams();
+  const resolvedId = blogId ?? searchParams.get("id");
   const isReadOnly =
     readOnlyProp === true ||
     searchParams.get("readonly") === "1" ||
     searchParams.get("mode") === "view";
 
-  const [loading, setLoading] = useState(!!resolvedId);        // 👈
-  const [saving, setSaving]   = useState(false);
+  const [loading, setLoading] = useState(!!resolvedId);
+  const [saving, setSaving] = useState(false);
 
-  // form state...
   const [title, setTitle] = useState("");
   const [description, setDesc] = useState("");
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState(null); // File | string(url) | null
   const [link, setLink] = useState("");
   const [linkError, setLinkError] = useState("");
 
   const fetchBlogById = useBlogsStore((s) => s.fetchBlogById);
-  const createBlog    = useBlogsStore((s) => s.createBlog);
-  const updateBlog    = useBlogsStore((s) => s.updateBlog);
+  const createBlog = useBlogsStore((s) => s.createBlog);
+  const updateBlog = useBlogsStore((s) => s.updateBlog);
 
   const validateLink = (val) => {
-    if (!val) { setLinkError(""); return true; }
+    if (!val) {
+      setLinkError("");
+      return true;
+    }
     try {
       const u = new URL(val);
       if (!/^https?:$/i.test(u.protocol)) throw new Error("bad protocol");
-      setLinkError(""); return true;
-    } catch { setLinkError("Please enter a valid URL starting with http:// or https://"); return false; }
+      setLinkError("");
+      return true;
+    } catch {
+      setLinkError("Please enter a valid URL starting with http:// or https://");
+      return false;
+    }
   };
 
+  // FileUpload can send event OR direct value (File/string/null)
   const onFile = (evtOrValue) => {
     if (isReadOnly) return;
+
+    let next = null;
+
+    // native event
     if (evtOrValue?.target?.files) {
-      setImage(evtOrValue.target.files?.[0] || null);
-      return;
+      next = evtOrValue.target.files?.[0] || null;
+    } else if (evtOrValue instanceof File || evtOrValue === null) {
+      next = evtOrValue;
+    } else if (typeof evtOrValue === "string") {
+      next = evtOrValue;
     }
-    if (typeof evtOrValue === "string" || evtOrValue instanceof File || evtOrValue === null) {
-      setImage(evtOrValue);
-    }
+
+    setImage(next);
   };
 
-  const imagePreview = useMemo(() => (image instanceof File ? URL.createObjectURL(image) : (typeof image === "string" ? image : null)), [image]);
+  // safe preview + cleanup
+  const imagePreview = useMemo(() => {
+    if (image instanceof File) return URL.createObjectURL(image);
+    return typeof image === "string" ? image : null;
+  }, [image]);
 
-  // ===== LOAD (uses resolvedId now) =====
+  useEffect(() => {
+    if (!(image instanceof File)) return;
+    const url = URL.createObjectURL(image);
+    return () => URL.revokeObjectURL(url);
+  }, [image]);
+
+  // LOAD for show/edit
   useEffect(() => {
     if (!resolvedId) return;
     (async () => {
       try {
         setLoading(true);
-        const data = await fetchBlogById(resolvedId);          // 👈
+        const data = await fetchBlogById(resolvedId);
+
         setTitle(data?.title || "");
         setDesc(data?.content ?? data?.description ?? "");
-        setImage(data?.icon ?? data?.image ?? null);
+        // ✅ use "image" from API (not icon)
+        setImage(data?.image ?? data?.icon ?? null);
         setLink(data?.link || "");
       } finally {
         setLoading(false);
       }
     })();
-  }, [resolvedId, fetchBlogById]);                              // 👈
-
-  const buildBody = () => ({
-    title: title.trim(),
-    content: description,
-    link: link.trim(),
-    icon: typeof image === "string" ? image : null,
-  });
+  }, [resolvedId, fetchBlogById]);
 
   const submit = async (e) => {
     e.preventDefault();
-    if (isReadOnly) { onSuccess && onSuccess(); return; }
+
+    if (isReadOnly) {
+      onSuccess?.();
+      return;
+    }
+
     if (!title.trim() || !description.trim()) return;
     if (!validateLink(link)) return;
+
     try {
       setSaving(true);
-      const body = buildBody();
-      if (resolvedId) await updateBlog(resolvedId, body);      // 👈
-      else await createBlog(body);
-      onSuccess && onSuccess();
+
+      const fd = new FormData();
+      fd.append("title", title.trim());
+      fd.append("content", description);
+
+      if (link?.trim()) fd.append("link", link.trim());
+
+      // ✅ only send file if it is File (real upload)
+      if (image instanceof File) {
+        fd.append("image", image);
+      }
+
+      // Create vs Update
+      if (resolvedId) {
+        // ✅ Laravel-friendly multipart update
+        fd.append("_method", "PATCH");
+        await updateBlog(resolvedId, fd, { forcePost: true });
+      } else {
+        await createBlog(fd);
+      }
+
+      onSuccess?.();
     } catch (err) {
       console.error(err);
       alert(err?.response?.data?.message || "Error saving blog. Please try again.");
@@ -98,7 +140,7 @@ export default function BlogFormTiny({
     }
   };
 
-  const cancel = () => onSuccess && onSuccess();
+  const cancel = () => onSuccess?.();
 
   if (loading) {
     return (
@@ -111,23 +153,31 @@ export default function BlogFormTiny({
 
   return (
     <AdminForm
-      title={resolvedId ? (isReadOnly ? "View Blog Post" : "Edit Blog Post") : "Add New Blog Post"}  // 👈
+      title={
+        resolvedId
+          ? isReadOnly
+            ? "View Blog Post"
+            : "Edit Blog Post"
+          : "Add New Blog Post"
+      }
       onSubmit={submit}
       onCancel={cancel}
-      submitText={isReadOnly ? "Close" : saving ? "Saving..." : resolvedId ? "Update Blog" : "Create Blog"} // 👈
+      submitText={isReadOnly ? "Close" : saving ? "Saving..." : resolvedId ? "Update Blog" : "Create Blog"}
       submitDisabled={isReadOnly ? false : saving || !title.trim() || !description.trim() || !!linkError}
     >
       {/* Title */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Blog Title *</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Blog Title *
+        </label>
         <input
           name="title"
           value={title}
           onChange={(e) => !isReadOnly && setTitle(e.target.value)}
           required
           maxLength={140}
-          placeholder="Write a clear, searchable title…"
           disabled={isReadOnly}
+          placeholder="Write a clear, searchable title…"
           className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
             isReadOnly ? "bg-gray-100 dark:bg-gray-800 cursor-not-allowed" : "border-gray-300 focus:ring-brand-500"
           }`}
@@ -135,20 +185,28 @@ export default function BlogFormTiny({
         <p className="text-xs text-gray-500 mt-1">{title.length}/140</p>
       </div>
 
-      {/* Link */}
+      {/* Link (optional) */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Link (optional)</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Link (optional)
+        </label>
         <input
           type="url"
           name="link"
           value={link}
-          onChange={(e) => { if (isReadOnly) return; setLink(e.target.value); validateLink(e.target.value); }}
-          placeholder="https://example.com/blog"
           disabled={isReadOnly}
+          onChange={(e) => {
+            if (isReadOnly) return;
+            setLink(e.target.value);
+            validateLink(e.target.value);
+          }}
+          placeholder="https://example.com/blog"
           className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-            linkError && !isReadOnly ? "border-red-500 focus:ring-red-400"
-            : isReadOnly ? "bg-gray-100 dark:bg-gray-800 cursor-not-allowed"
-            : "border-gray-300 focus:ring-brand-500"
+            linkError && !isReadOnly
+              ? "border-red-500 focus:ring-red-400"
+              : isReadOnly
+              ? "bg-gray-100 dark:bg-gray-800 cursor-not-allowed"
+              : "border-gray-300 focus:ring-brand-500"
           }`}
           inputMode="url"
           pattern="https?://.*"
@@ -156,24 +214,39 @@ export default function BlogFormTiny({
         {linkError && !isReadOnly && <p className="mt-1 text-xs text-red-600">{linkError}</p>}
       </div>
 
-      {/* Icon */}
+      {/* Image */}
       <div className="mb-6">
+        {/* ✅ IMPORTANT: name="image" */}
         <FileUpload
-          label="Icon / Cover (optional)"
-          name="icon"
+          label="Image / Cover (optional)"
+          name="image"
           value={image}
           onChange={onFile}
           accept="image/*"
           disabled={isReadOnly}
         />
+
         {imagePreview && (
-          <img src={imagePreview} alt="Icon preview" className="mt-2 h-20 w-20 rounded object-cover border border-gray-200" />
+          <img
+            src={imagePreview}
+            alt="Preview"
+            className="mt-2 h-20 w-20 rounded object-cover border border-gray-200"
+          />
+        )}
+
+        {/* Helpful notice */}
+        {!isReadOnly && typeof image === "string" && (
+          <p className="mt-1 text-xs text-gray-500">
+            Current image is already stored as URL in the API.
+          </p>
         )}
       </div>
 
       {/* Content */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Content *</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Content *
+        </label>
         <Editor
           apiKey={apiKey}
           value={description}
@@ -182,12 +255,14 @@ export default function BlogFormTiny({
             height: 520,
             menubar: false,
             readonly: isReadOnly ? 1 : 0,
-            plugins: "anchor autolink charmap code codesample directionality emoticons image link lists media preview searchreplace table visualblocks wordcount",
+            plugins:
+              "anchor autolink charmap code codesample directionality emoticons image link lists media preview searchreplace table visualblocks wordcount",
             toolbar: isReadOnly
               ? "preview | code"
               : "undo redo | blocks | bold italic underline strikethrough | align bullist numlist outdent indent | link image media table | removeformat | ltr rtl | code preview",
             convert_urls: false,
-            content_style: "body{font-family:Inter,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif; font-size:15px; line-height:1.7;}",
+            content_style:
+              "body{font-family:Inter,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif; font-size:15px; line-height:1.7;}",
           }}
         />
       </div>

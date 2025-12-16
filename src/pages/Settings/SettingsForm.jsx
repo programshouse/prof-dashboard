@@ -6,6 +6,25 @@ import PageHeader from "../../components/ui/PageHeader";
 import AdminForm from "../../components/ui/AdminForm";
 import { useSettingsStore } from "../../stores/useSettingsStore";
 
+// Stable, memoized row to prevent unmount/mount on each keystroke (preserves input focus)
+const SocialRow = React.memo(function SocialRow({ label, value, onChange, disabled }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="flex h-10 w-28 items-center justify-start text-sm font-medium text-gray-700 dark:text-gray-300">
+        {label}
+      </span>
+      <input
+        type="url"
+        inputMode="url"
+        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white ${disabled ? "bg-gray-100 dark:bg-gray-800 cursor-not-allowed border-gray-200 dark:border-gray-700" : "border-gray-300"}`}
+        value={value}
+        onChange={(e) => !disabled && onChange(e.target.value)}
+        disabled={disabled}
+      />
+    </div>
+  );
+});
+
 export default function SettingsForm({ onSuccess }) {
   const [searchParams] = useSearchParams();
   const isReadOnly =
@@ -51,12 +70,10 @@ export default function SettingsForm({ onSuccess }) {
     } else {
       seed(settings);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (settings) seed(settings);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
 
   const setField  = (name, value) => setForm((p) => ({ ...p, [name]: value }));
@@ -79,7 +96,7 @@ export default function SettingsForm({ onSuccess }) {
       setSaving(true);
       await updateSettings({ ...form });
       onSuccess && onSuccess();
-    } catch (e) {
+    } catch {
       alert("Failed to save settings.");
     } finally {
       setSaving(false);
@@ -92,22 +109,6 @@ export default function SettingsForm({ onSuccess }) {
   const disabledCls = isReadOnly
     ? "bg-gray-100 dark:bg-gray-800 cursor-not-allowed border-gray-200 dark:border-gray-700"
     : "border-gray-300";
-
-  const SocialRow = ({ label, value, onChange }) => (
-    <div className="flex items-center gap-3">
-      <span className="flex h-10 w-28 items-center justify-start text-sm font-medium text-gray-700 dark:text-gray-300">
-        {label}
-      </span>
-      <input
-        type="url"
-        inputMode="url"
-        className={`${inputCls} ${disabledCls}`}
-        value={value}
-        onChange={(e) => !isReadOnly && onChange(e.target.value)}
-        disabled={isReadOnly}
-      />
-    </div>
-  );
 
   return (
     <PageLayout title={`${isReadOnly ? "View" : "Edit"} Settings | ProfMSE`}>
@@ -200,11 +201,11 @@ export default function SettingsForm({ onSuccess }) {
             {/* Socials */}
             <div className="mt-6 space-y-4">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Social Links</h3>
-              <SocialRow label="Facebook" value={form.socials.facebook} onChange={(v) => setSocial("facebook", v)} />
-              <SocialRow label="WhatsApp" value={form.socials.whatsapp} onChange={(v) => setSocial("whatsapp", v)} />
-              <SocialRow label="Instagram" value={form.socials.instagram} onChange={(v) => setSocial("instagram", v)} />
-              <SocialRow label="Twitter" value={form.socials.twitter} onChange={(v) => setSocial("twitter", v)} />
-              <SocialRow label="LinkedIn" value={form.socials.linkedin} onChange={(v) => setSocial("linkedin", v)} />
+              <SocialRow label="Facebook" value={form.socials.facebook} onChange={(v) => setSocial("facebook", v)} disabled={isReadOnly} />
+              <SocialRow label="WhatsApp" value={form.socials.whatsapp} onChange={(v) => setSocial("whatsapp", v)} disabled={isReadOnly} />
+              <SocialRow label="Instagram" value={form.socials.instagram} onChange={(v) => setSocial("instagram", v)} disabled={isReadOnly} />
+              <SocialRow label="Twitter" value={form.socials.twitter} onChange={(v) => setSocial("twitter", v)} disabled={isReadOnly} />
+              <SocialRow label="LinkedIn" value={form.socials.linkedin} onChange={(v) => setSocial("linkedin", v)} disabled={isReadOnly} />
             </div>
           </AdminForm>
         )}

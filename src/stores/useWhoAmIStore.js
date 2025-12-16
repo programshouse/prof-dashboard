@@ -127,12 +127,15 @@ const buildHeaders = (body) => {
   return { ...base, "Content-Type": "application/json" };
 };
 
-const toList = (data) =>
-  Array.isArray(data) ? data
-  : Array.isArray(data?.data) ? data.data
-  : Array.isArray(data?.items) ? data.items
-  : Array.isArray(data?.result) ? data.result
-  : [];
+// Normalize API responses that may return either a single object or an array
+const toList = (data) => {
+  // common wrappers
+  const payload = data?.data ?? data?.items ?? data?.result ?? data;
+
+  if (Array.isArray(payload)) return payload;
+  if (payload && typeof payload === "object") return [payload];
+  return [];
+};
 
 export const useWhoAmIStore = create((set, get) => ({
   items: [],
@@ -170,7 +173,18 @@ export const useWhoAmIStore = create((set, get) => ({
     try {
       const payload = autoFormData(rawBody);
       const headers = buildHeaders(payload);
-      const { data } = await api.patch(`/${id}`, payload, { headers });
+
+      // If sending files, use Laravel-friendly method override for PATCH with multipart
+      let resp;
+      if (isFormData(payload)) {
+        // Laravel accepts POST with _method=PATCH when multipart is required
+        payload.append("_method", "PATCH");
+        resp = await api.post(`/${id}`, payload, { headers });
+      } else {
+        resp = await api.patch(`/${id}`, payload, { headers });
+      }
+
+      const data = resp.data;
       const updated = data?.data ?? data;
       set({ updated, loading: false });
       await get().fetchAll();

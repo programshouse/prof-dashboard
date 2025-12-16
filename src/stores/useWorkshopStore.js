@@ -2,7 +2,7 @@
 import { create } from "zustand";
 import axios from "axios";
 
-const API_ROOT = "https://www.programshouse.com/dashboards/prof/api/workshops"; // no trailing slash
+const API_ROOT = "https://www.programshouse.com/dashboards/prof/api/workshops";
 const api = axios.create({ baseURL: API_ROOT });
 
 const authHeaders = () => {
@@ -10,21 +10,15 @@ const authHeaders = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-// Helper: are we sending FormData?
 const isFormData = (v) =>
   typeof FormData !== "undefined" && v instanceof FormData;
 
-// Build headers depending on body type
 const buildHeaders = (body) => {
   const base = { ...authHeaders(), Accept: "application/json" };
-  if (isFormData(body)) {
-    // DO NOT set Content-Type; axios/browser will set the proper boundary
-    return base;
-  }
+  if (isFormData(body)) return base; // let browser set boundary
   return { ...base, "Content-Type": "application/json" };
 };
 
-// Normalize list from different API shapes
 const toList = (data) =>
   Array.isArray(data) ? data
   : Array.isArray(data?.data) ? data.data
@@ -40,7 +34,6 @@ export const useWorkshopStore = create((set, get) => ({
   createdworkshop: null,
   updatedworkshop: null,
 
-  // CREATE: POST /workshops
   async createworkshop(body) {
     set({ loading: true, error: null });
     try {
@@ -59,12 +52,12 @@ export const useWorkshopStore = create((set, get) => ({
     }
   },
 
-  // UPDATE: PATCH /workshops/:id  (explicit signature: updateworkshop(id, body))
   async updateworkshop(idOrObj, maybeBody) {
     const id =
       typeof idOrObj === "string" || typeof idOrObj === "number"
         ? idOrObj
         : idOrObj?.id;
+
     const body = maybeBody ?? (typeof idOrObj === "object" ? idOrObj : {});
     if (!id) throw new Error("updateworkshop: missing id");
 
@@ -85,7 +78,6 @@ export const useWorkshopStore = create((set, get) => ({
     }
   },
 
-  // DELETE: DELETE /workshops/:id
   async deleteworkshop(idOrObj) {
     const id =
       typeof idOrObj === "string" || typeof idOrObj === "number"
@@ -108,7 +100,6 @@ export const useWorkshopStore = create((set, get) => ({
     }
   },
 
-  // LIST: GET /workshops
   async fetchworkshops() {
     set({ loading: true, error: null });
     try {
@@ -125,15 +116,14 @@ export const useWorkshopStore = create((set, get) => ({
     }
   },
 
-  // SHOW: GET /workshops/:id
   async fetchworkshopById(id) {
     if (!id) throw new Error("fetchworkshopById: missing id");
     set({ loading: true, error: null });
     try {
       const { data } = await api.get(`/${id}`, { headers: authHeaders() });
-      const svc = data?.data ?? data;
-      set({ workshop: svc, loading: false });
-      return svc;
+      const w = data?.data ?? data;
+      set({ workshop: w, loading: false });
+      return w;
     } catch (err) {
       set({
         error: err?.response?.data?.message || "Failed to get workshop",
