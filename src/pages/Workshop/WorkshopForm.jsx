@@ -470,7 +470,7 @@ export default function WorkshopForm({ onSuccess, workshopId }) {
             {/* Media rows */}
             <div className="grid grid-cols-1 gap-6 mt-6">
               {/* Image row */}
-              <div className={isReadOnly ? "opacity-60 pointer-events-none" : ""}>
+              <div className={isReadOnly ? "  pointer-events-none" : ""}>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Image (PNG/JPG/WEBP/SVG/GIF)
                 </label>
@@ -516,7 +516,7 @@ export default function WorkshopForm({ onSuccess, workshopId }) {
               </div>
 
               {/* Video row */}
-              <div className={isReadOnly ? "opacity-60 pointer-events-none" : ""}>
+              <div className={isReadOnly ? "  pointer-events-none" : ""}>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Video (any video/*)
                 </label>

@@ -230,7 +230,7 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
             </div>
 
             {/* Image File */}
-            <div className={isReadOnly ? "opacity-60 pointer-events-none" : ""}>
+            <div className={isReadOnly ? "  pointer-events-none" : ""}>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Image (PNG/JPG/JPEG/WEBP/SVG/GIF)
               </label>
