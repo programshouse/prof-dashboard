@@ -11,11 +11,11 @@ export default function ProfileList({ onEdit }) {
   const navigate = useNavigate();
 
   const fetchAll = useWhoAmIStore((s) => s.fetchAll);
-  const destroy = useWhoAmIStore((s) => s.delete ?? s.remove ?? s.deleteOne ?? s.destroy);
+  // const destroy = useWhoAmIStore((s) => s.delete ?? s.remove ?? s.deleteOne ?? s.destroy);
 
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [, setDeleting] = useState(new Set());
+  // const [, setDeleting] = useState(new Set());
 
   useEffect(() => {
     (async () => {
@@ -42,26 +42,26 @@ export default function ProfileList({ onEdit }) {
     gotoForm(row);
   };
 
-  const handleDelete = async (row) => {
-    const id = getId(row);
-    if (!id || !destroy) {
-      alert("Delete not wired yet.");
-      return;
-    }
-    if (!window.confirm("Delete this profile?")) return;
+  // const handleDelete = async (row) => {
+  //   const id = getId(row);
+  //   if (!id || !destroy) {
+  //     alert("Delete not wired yet.");
+  //     return;
+  //   }
+  //   if (!window.confirm("Delete this profile?")) return;
 
-    try {
-      setDeleting((prev) => new Set(prev).add(id));
-      await destroy(id);
-      setRows((prev) => prev.filter((r) => getId(r) !== id));
-    } finally {
-      setDeleting((prev) => {
-        const n = new Set(prev);
-        n.delete(id);
-        return n;
-      });
-    }
-  };
+  //   try {
+  //     setDeleting((prev) => new Set(prev).add(id));
+  //     await destroy(id);
+  //     setRows((prev) => prev.filter((r) => getId(r) !== id));
+  //   } finally {
+  //     setDeleting((prev) => {
+  //       const n = new Set(prev);
+  //       n.delete(id);
+  //       return n;
+  //     });
+  //   }
+  // };
 
   const columns = useMemo(
     () => [
@@ -157,7 +157,7 @@ export default function ProfileList({ onEdit }) {
             columns={columns}
             onShow={(row) => { const id = (row?.id ?? row?._id); const params = new URLSearchParams(); if (id) { params.set('id', id); } params.set('readonly','1'); const qs = params.toString(); navigate('/who-am-i/form' + (qs ? ('?' + qs) : '')); }}
             onEdit={(row) => handleEdit(row)}
-            onDelete={(index) => rows[index] && handleDelete(rows[index])}
+            // onDelete={(index) => rows[index] && handleDelete(rows[index])}
           />
         </div>
       </div>

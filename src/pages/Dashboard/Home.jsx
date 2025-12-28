@@ -9,9 +9,7 @@ import {
   Briefcase,
   Users,
   Mail,
-  Phone,
   BadgeCheck,
-  User2,
 } from "lucide-react";
 
 const StatCard = ({ icon: Icon, iconBg, iconColor, label, value }) => (
@@ -34,13 +32,10 @@ const StatCard = ({ icon: Icon, iconBg, iconColor, label, value }) => (
       </div>
     </div>
 
-    <div className="mt-4 h-px bg-gray-100 dark:bg-gray-700/60" />
+
 
     <div className="mt-4 flex items-center justify-between">
-      <span className="text-xs text-gray-500 dark:text-gray-400">Overview</span>
-      <span className="text-xs font-medium text-gray-700 dark:text-gray-200">
-        —
-      </span>
+ 
     </div>
   </UniversalCard>
 );
@@ -68,7 +63,7 @@ export default function Home() {
   }, [fetchBlogs, fetchServices, fetchSubscribers]);
 
   const latestSubscribers = useMemo(
-    () => (subscribers || []).slice(0, 5),
+    () => (subscribers || []).slice(0, 3),
     [subscribers]
   );
 
@@ -128,9 +123,9 @@ export default function Home() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 dark:bg-gray-800/60">
               <tr className="text-left text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                <th className="px-6 py-3">Subscriber</th>
+
                 <th className="px-6 py-3">Email</th>
-                <th className="px-6 py-3">Phone</th>
+     
                 <th className="px-6 py-3">Status</th>
               </tr>
             </thead>
@@ -138,9 +133,9 @@ export default function Home() {
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700/60">
               {latestSubscribers.length > 0 ? (
                 latestSubscribers.map((subscriber, index) => {
-                  const name = subscriber?.name || "N/A";
+           
                   const email = subscriber?.email || "N/A";
-                  const phone = subscriber?.phone || "N/A";
+            
                   const status = subscriber?.status || "active";
                   const isActive = status === "active";
 
@@ -149,20 +144,7 @@ export default function Home() {
                       key={subscriber?.id || index}
                       className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors"
                     >
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <Avatar name={name} />
-                          <div className="min-w-0">
-                            <p className="font-medium text-gray-900 dark:text-white truncate">
-                              {name}
-                            </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                              <User2 className="w-3.5 h-3.5" />
-                              Subscriber
-                            </p>
-                          </div>
-                        </div>
-                      </td>
+
 
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
@@ -173,12 +155,7 @@ export default function Home() {
                         </div>
                       </td>
 
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
-                          <Phone className="w-4 h-4 text-gray-400" />
-                          <span>{phone}</span>
-                        </div>
-                      </td>
+
 
                       <td className="px-6 py-4">
                         <span
@@ -218,7 +195,7 @@ export default function Home() {
 
         {/* Card Footer */}
         <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-700/60 text-xs text-gray-500 dark:text-gray-400">
-          Showing {Math.min(latestSubscribers.length, 5)} of{" "}
+          Showing {Math.min(latestSubscribers.length, 3)} of{" "}
           {subscribers?.length ?? 0} subscribers
         </div>
       </UniversalCard>
