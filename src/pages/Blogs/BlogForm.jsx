@@ -9,7 +9,7 @@ import { Editor } from "@tinymce/tinymce-react";
 export default function BlogFormTiny({
   blogId,
   onSuccess,
-  apiKey = "lmml35k9i4dyhe5swfgxoufuqhwpbcqgz25m38779fehig9r",
+  apiKey = import.meta.env.VITE_TINYMCE_API_KEY || "your-api-key-here",
   readOnly: readOnlyProp,
 }) {
   const [searchParams] = useSearchParams();
