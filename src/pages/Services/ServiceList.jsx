@@ -93,21 +93,27 @@ export default function ServiceList({ onEdit, onAdd }) {
     <PageLayout title="Services Management | ProfMSE">
       <Toaster position="bottom-right" />
 
-      <PageHeader
-        title="Services Management"
-        description="Manage services that appear on the website"
-      >
-        {/* TOP-RIGHT ADD NEW BUTTON */}
-        {onAdd ? (
-          <Button onClick={onAdd} variant="primary">+ Add New Service</Button>
-        ) : (
-          <Link to="/services/form">
-            <Button variant="primary">+ Add New Service</Button>
-          </Link>
-        )}
-      </PageHeader>
-
       <main className="px-4 pb-24" style={{ minWidth: "1400px" }}>
+
+          <div className="flex justify-end mb-4">
+         
+            {onAdd ? (
+              <button
+                onClick={onAdd}
+                className="bg-brand-600 hover:bg-brand-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+              >
+                + Add New Service
+              </button>
+            ) : (
+              <Link to="/services/form">
+                <button className="bg-brand-600 hover:bg-brand-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                  + Add New Service
+                </button>
+              </Link>
+            )}
+          </div>
+
+
         {error && (
           <div className="text-center text-red-600 mb-4">
             Failed to load services. Check console & network tab.
