@@ -146,25 +146,25 @@ export default function BlogList({ onEdit, onAdd }) {
         );
       },
     },
-    {
-      key: "link",
-      header: "Link",
-      render: (row) => {
-        const l = safeUrl(row?.link || "");
-        if (!l) return <span className="text-gray-400">—</span>;
-        return (
-          <a
-            href={l}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center px-2 py-1 text-xs rounded-md bg-brand-50 text-brand-700 border border-brand-200 hover:bg-brand-100 dark:bg-brand-900/10 dark:text-brand-300 dark:border-brand-800"
-            title={l}
-          >
-            {l}
-          </a>
-        );
-      },
-    },
+    // {
+    //   key: "link",
+    //   header: "Link",
+    //   render: (row) => {
+    //     const l = safeUrl(row?.link || "");
+    //     if (!l) return <span className="text-gray-400">—</span>;
+    //     return (
+    //       <a
+    //         href={l}
+    //         target="_blank"
+    //         rel="noreferrer"
+    //         className="inline-flex items-center px-2 py-1 text-xs rounded-md bg-brand-50 text-brand-700 border border-brand-200 hover:bg-brand-100 dark:bg-brand-900/10 dark:text-brand-300 dark:border-brand-800"
+    //         title={l}
+    //       >
+    //         {l}
+    //       </a>
+    //     );
+    //   },
+    // },
     {
       key: "icon",
       header: "Icon",

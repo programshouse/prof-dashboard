@@ -23,6 +23,7 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
     title: "",
     description: "",
     link: "",
+    features: [],          // Array of feature strings
     imageFile: null,       // File only
     imageExistingUrl: "",  // when editing, show existing image
   });
@@ -55,6 +56,7 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
           title: data?.title ?? "",
           description: data?.description ?? "",
           link: data?.link ?? "",
+          features: Array.isArray(data?.features) ? data.features : [],
           imageExistingUrl: typeof data?.image === "string" ? data.image : "",
           imageFile: null,
         }));
@@ -120,6 +122,25 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
 
   const clearImg = () => { setForm((p) => ({ ...p, imageFile: null })); revoke(); };
 
+  // Features handlers
+  const addFeature = () => {
+    setForm((p) => ({ ...p, features: [...p.features, ""] }));
+  };
+
+  const updateFeature = (index, value) => {
+    setForm((p) => ({
+      ...p,
+      features: p.features.map((f, i) => (i === index ? value : f)),
+    }));
+  };
+
+  const removeFeature = (index) => {
+    setForm((p) => ({
+      ...p,
+      features: p.features.filter((_, i) => i !== index),
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isReadOnly) { onSuccess && onSuccess(); return; }
@@ -135,6 +156,7 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
         title: form.title.trim(),
         description: form.description.trim(),
         link: form.link?.trim() || "",
+        features: form.features.filter(f => f.trim() !== ""), // Filter out empty features
         // Only send image if new file is selected, otherwise don't send image field to preserve existing
         ...(form.imageFile instanceof File ? { image: form.imageFile } : {}),
       };
@@ -210,6 +232,43 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
                 required
                 disabled={disabled}
               />
+            </div>
+
+            {/* Features */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Features</label>
+              <div className="space-y-2">
+                {form.features.map((feature, index) => (
+                  <div key={index} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={feature}
+                      onChange={(e) => updateFeature(index, e.target.value)}
+                      placeholder={`Feature ${index + 1}`}
+                      className={`${inputCls} ${disabledCls}`}
+                      disabled={disabled}
+                    />
+                    {!disabled && (
+                      <button
+                        type="button"
+                        onClick={() => removeFeature(index)}
+                        className="px-3 py-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {!disabled && (
+                  <button
+                    type="button"
+                    onClick={addFeature}
+                    className="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
+                  >
+                    Add Feature
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Link (optional) */}

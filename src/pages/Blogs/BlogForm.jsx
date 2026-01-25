@@ -186,7 +186,7 @@ export default function BlogFormTiny({
       </div>
 
       {/* Link (optional) */}
-      <div className="mb-6">
+      {/* <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Link (optional)
         </label>
@@ -212,7 +212,7 @@ export default function BlogFormTiny({
           pattern="https?://.*"
         />
         {linkError && !isReadOnly && <p className="mt-1 text-xs text-red-600">{linkError}</p>}
-      </div>
+      </div> */}
 
       {/* Image */}
       <div className="mb-6">

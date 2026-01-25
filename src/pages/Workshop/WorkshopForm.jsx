@@ -51,6 +51,7 @@ const INITIAL = {
   description: "",
   link: "",
   is_active: 1,
+  features: [],          // Array of feature strings
 
   // local picked files
   imageFile: null,
@@ -113,6 +114,7 @@ export default function WorkshopForm({ onSuccess, workshopId }) {
             description: w?.description || "",
             link: w?.link || "",
             is_active: Number(w?.is_active ?? 1),
+            features: Array.isArray(w?.features) ? w.features : [],
             imgExistingUrl: w?.image || "",
             vidExistingUrl: w?.video || "",
           });
@@ -257,6 +259,25 @@ export default function WorkshopForm({ onSuccess, workshopId }) {
     }));
   };
 
+  // Features handlers
+  const addFeature = () => {
+    setForm((p) => ({ ...p, features: [...p.features, ""] }));
+  };
+
+  const updateFeature = (index, value) => {
+    setForm((p) => ({
+      ...p,
+      features: p.features.map((f, i) => (i === index ? value : f)),
+    }));
+  };
+
+  const removeFeature = (index) => {
+    setForm((p) => ({
+      ...p,
+      features: p.features.filter((_, i) => i !== index),
+    }));
+  };
+
   /* ---------- Validation ---------- */
   const vErrs = useMemo(() => {
     const m = {};
@@ -297,6 +318,10 @@ export default function WorkshopForm({ onSuccess, workshopId }) {
       fd.append("description", form.description.trim());
       fd.append("link", (form.link || "").trim());
       fd.append("is_active", String(Number(form.is_active ?? 1)));
+      
+      // Add features array as JSON string
+      const filteredFeatures = form.features.filter(f => f.trim() !== "");
+      fd.append("features", JSON.stringify(filteredFeatures));
 
       // ✅ send remove flags
       if (form.remove_image === true) fd.append("remove_image", "1");
@@ -438,6 +463,45 @@ export default function WorkshopForm({ onSuccess, workshopId }) {
                   disabled={isReadOnly}
                 />
                 {vErrs.description && <p className="text-xs text-red-600 mt-1">{vErrs.description}</p>}
+              </div>
+
+              {/* Features row */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Features
+                </label>
+                <div className="space-y-2">
+                  {form.features.map((feature, index) => (
+                    <div key={index} className="flex gap-2">
+                      <input
+                        type="text"
+                        value={feature}
+                        onChange={(e) => updateFeature(index, e.target.value)}
+                        placeholder={`Feature ${index + 1}`}
+                        className={`${inputCls} ${disabledCls}`}
+                        disabled={isReadOnly}
+                      />
+                      {!isReadOnly && (
+                        <button
+                          type="button"
+                          onClick={() => removeFeature(index)}
+                          className="px-3 py-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  {!isReadOnly && (
+                    <button
+                      type="button"
+                      onClick={addFeature}
+                      className="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors"
+                    >
+                      Add Feature
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Link row */}
