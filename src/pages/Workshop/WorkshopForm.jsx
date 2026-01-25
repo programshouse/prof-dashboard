@@ -319,9 +319,11 @@ export default function WorkshopForm({ onSuccess, workshopId }) {
       fd.append("link", (form.link || "").trim());
       fd.append("is_active", String(Number(form.is_active ?? 1)));
       
-      // Add features array as JSON string
+      // Add features array properly
       const filteredFeatures = form.features.filter(f => f.trim() !== "");
-      fd.append("features", JSON.stringify(filteredFeatures));
+      filteredFeatures.forEach((feature, index) => {
+        fd.append(`features[${index}]`, feature);
+      });
 
       // ✅ send remove flags
       if (form.remove_image === true) fd.append("remove_image", "1");
