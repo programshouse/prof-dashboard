@@ -23,6 +23,7 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
     title: "",
     description: "",
     link: "",
+    alt: "",
     features: [],          // Array of feature strings
     imageFile: null,       // File only
     imageExistingUrl: "",  // when editing, show existing image
@@ -56,6 +57,7 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
           title: data?.title ?? "",
           description: data?.description ?? "",
           link: data?.link ?? "",
+          alt: data?.alt ?? "",
           features: Array.isArray(data?.features) ? data.features : [],
           imageExistingUrl: typeof data?.image === "string" ? data.image : "",
           imageFile: null,
@@ -156,6 +158,7 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
         title: form.title.trim(),
         description: form.description.trim(),
         link: form.link?.trim() || "",
+        alt: form.alt?.trim() || "",
         features: form.features.filter(f => f.trim() !== ""), // Filter out empty features
         // Only send image if new file is selected, otherwise don't send image field to preserve existing
         ...(form.imageFile instanceof File ? { image: form.imageFile } : {}),
@@ -286,6 +289,21 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
                 disabled={disabled}
               />
               {linkErr && <p className="mt-1 text-xs text-red-600">{linkErr}</p>}
+            </div>
+
+            {/* Alt Text */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Alt Text (for image accessibility)</label>
+              <input
+                type="text"
+                name="alt"
+                value={form.alt}
+                onChange={onText}
+                placeholder="Describe the image for screen readers"
+                className={`${inputCls} ${disabled ? "border-gray-200 dark:border-gray-700" : "border-gray-300 focus:ring-brand-500"}`}
+                disabled={disabled}
+                maxLength={255}
+              />
             </div>
 
             {/* Image File */}

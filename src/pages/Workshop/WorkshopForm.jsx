@@ -50,6 +50,8 @@ const INITIAL = {
   title: "",
   description: "",
   link: "",
+  video_link: "",
+  alt: "",
   is_active: 1,
   features: [],          // Array of feature strings
 
@@ -113,6 +115,8 @@ export default function WorkshopForm({ onSuccess, workshopId }) {
             title: w?.title || "",
             description: w?.description || "",
             link: w?.link || "",
+            video_link: w?.video_link || "",
+            alt: w?.alt || "",
             is_active: Number(w?.is_active ?? 1),
             features: Array.isArray(w?.features) ? w.features : [],
             imgExistingUrl: w?.image || "",
@@ -317,6 +321,8 @@ export default function WorkshopForm({ onSuccess, workshopId }) {
       fd.append("title", form.title.trim());
       fd.append("description", form.description.trim());
       fd.append("link", (form.link || "").trim());
+      fd.append("video_link", (form.video_link || "").trim());
+      fd.append("alt", (form.alt || "").trim());
       fd.append("is_active", String(Number(form.is_active ?? 1)));
       
       // Add features array properly
@@ -519,6 +525,37 @@ export default function WorkshopForm({ onSuccess, workshopId }) {
                   disabled={isReadOnly}
                 />
                 {vErrs.link && <p className="text-xs text-red-600 mt-1">{vErrs.link}</p>}
+              </div>
+
+              {/* Video Link row */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Video Link
+                </label>
+                <input
+                  name="video_link"
+                  value={form.video_link}
+                  onChange={onText}
+                  className={`${inputCls} ${disabledCls}`}
+                  disabled={isReadOnly}
+                  placeholder="https://example.com/video"
+                />
+              </div>
+
+              {/* Alt Text row */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Alt Text (for image accessibility)
+                </label>
+                <input
+                  name="alt"
+                  value={form.alt}
+                  onChange={onText}
+                  className={`${inputCls} ${disabledCls}`}
+                  disabled={isReadOnly}
+                  placeholder="Describe the image for screen readers"
+                  maxLength={255}
+                />
               </div>
 
               {/* Active row */}

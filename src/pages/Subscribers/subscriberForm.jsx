@@ -5,7 +5,7 @@ import PageHeader from "../../components/ui/PageHeader";
 import AdminForm from "../../components/ui/AdminForm";
 import { useSubscribersStore } from "../../stores/useSubscribersStore";
 
-const INITIAL = { email: "", name: "" };
+const INITIAL = { email: "", name: "", alt: "" };
 
 export default function SubscriberForm({ subscriberId, initialValues, onSuccess }) {
   const [form, setForm] = useState(INITIAL);
@@ -21,7 +21,7 @@ export default function SubscriberForm({ subscriberId, initialValues, onSuccess 
     let mounted = true;
     (async () => {
       if (!subscriberId) {
-        if (initialValues) setForm({ email: initialValues.email || "", name: initialValues.name || "" });
+        if (initialValues) setForm({ email: initialValues.email || "", name: initialValues.name || "", alt: initialValues.alt || "" });
         setLoading(false);
         return;
       }
@@ -29,7 +29,7 @@ export default function SubscriberForm({ subscriberId, initialValues, onSuccess 
         setLoading(true); setError("");
         const data = await fetchSubscriberById(subscriberId);
         if (!mounted) return;
-        setForm({ email: data?.email || "", name: data?.name || data?.fullName || "" });
+        setForm({ email: data?.email || "", name: data?.name || data?.fullName || "", alt: data?.alt || "" });
       } catch (e) {
         if (mounted) setError(e?.response?.data?.message || "Failed to load subscriber");
       } finally { if (mounted) setLoading(false); }
@@ -50,7 +50,11 @@ export default function SubscriberForm({ subscriberId, initialValues, onSuccess 
     if (disabled) return;
     try {
       setSaving(true); setError("");
-      const body = { email: form.email.trim(), ...(form.name?.trim() ? { name: form.name.trim() } : {}) };
+      const body = { 
+        email: form.email.trim(), 
+        ...(form.name?.trim() ? { name: form.name.trim() } : {}),
+        ...(form.alt?.trim() ? { alt: form.alt.trim() } : {})
+      };
       if (subscriberId) await updateSubscriber(subscriberId, body);
       else await createSubscriber(body);
       onSuccess && onSuccess();
@@ -104,6 +108,18 @@ export default function SubscriberForm({ subscriberId, initialValues, onSuccess 
                 value={form.name}
                 onChange={onChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Alt Text (optional)</label>
+              <input
+                type="text"
+                name="alt"
+                value={form.alt}
+                onChange={onChange}
+                placeholder="Additional notes or alt text"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                maxLength={255}
               />
             </div>
           </AdminForm>

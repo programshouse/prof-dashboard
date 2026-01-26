@@ -34,6 +34,7 @@ const INITIAL = {
   id: null,
   title: "",
   description: "",
+  alt: "",
   features: [],
 
   imageFile: null,
@@ -96,6 +97,7 @@ export default function ProfileForm({ onSuccess }) {
           id: src?.id ?? src?._id ?? null,
           title: src?.title || "",
           description: src?.description || "",
+          alt: src?.alt || "",
           features: Array.isArray(src?.features) ? src.features : [],
           imgExistingUrl: src?.image || "",
           vidExistingUrl: src?.video || "",
@@ -289,6 +291,7 @@ export default function ProfileForm({ onSuccess }) {
       const fd = new FormData();
       fd.append("title", form.title.trim());
       fd.append("description", form.description.trim());
+      fd.append("alt", form.alt.trim());
       (form.features || []).forEach((feat) => fd.append("features[]", feat));
 
       // delete flags

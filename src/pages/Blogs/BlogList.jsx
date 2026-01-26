@@ -81,7 +81,7 @@ export default function BlogList({ onEdit, onAdd }) {
     }
   };
 
-  // Columns: Post (icon+title+id+Visit), Content preview, Link chip, Icon thumb
+  // Columns: Post (icon+title+id+Visit), Category, Content preview, Link chip, Icon thumb
   const columns = useMemo(() => [
     {
       key: "title",
@@ -94,21 +94,27 @@ export default function BlogList({ onEdit, onAdd }) {
         const l = safeUrl(row?.link || "");
         return (
           <div className="flex items-center gap-3 max-w-xl">
-            {iconUrl ? (
-              <img
-                src={iconUrl}
-                alt={t}
-                className="w-10 h-10 rounded-lg object-cover border border-gray-200 dark:border-gray-700"
-              />
-            ) : (
-              <div className="w-10 h-10 rounded-lg grid place-items-center bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300 text-sm font-medium border border-gray-200 dark:border-gray-700">
-                {initials(t)}
+            <div className="relative shrink-0">
+              {iconUrl ? (
+                <img
+                  src={iconUrl}
+                  alt={t}
+                  className="w-10 h-10 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                    {initials(t)}
+                  </span>
+                </div>
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="font-medium text-gray-900 dark:text-white truncate" title={t}>
+                {t}
               </div>
-            )}
-            <div className="min-w-0">
-              <div className="font-medium text-gray-900 dark:text-gray-100 truncate">{t}</div>
               <div className="text-xs text-gray-500 dark:text-gray-400">
-                ID: <span className="font-mono">{id || "—"}</span>
+                ID: {id || "—" }
               </div>
             </div>
             {l && (
@@ -121,8 +127,8 @@ export default function BlogList({ onEdit, onAdd }) {
               >
                 Visit
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M12.293 2.293a1 1 0 011.414 0l4 4a.997.997 0 01.083 1.32l-.083.094-4 4a1 1 0 01-1.497-1.32l.083-.094L14.586 8H9a5 5 0 00-4.995 4.783L4 13a1 1 0 11-2 0 7 7 0 016.764-6.996L9 6h5.586l-2.293-2.293a1 1 0 01-.083-1.32l.083-.094z" />
-                  <path d="M4 17a1 1 0 100-2 1 1 0 000 2z" />
+                  <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+                  <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
                 </svg>
               </a>
             )}
@@ -131,21 +137,35 @@ export default function BlogList({ onEdit, onAdd }) {
       },
     },
     {
-      key: "content",
-      header: "Content Preview",
+      key: "category",
+      header: "Category",
       render: (row) => {
-        const html = row?.content ?? row?.description ?? "";
-        const text = stripHtml(html);
+        const category = row?.category || "—";
         return (
-          <div
-            className="text-gray-700 dark:text-gray-300 max-w-2xl line-clamp-2"
-            title={text.length > 200 ? text.slice(0, 500) : text}
-          >
-            {text || <span className="text-gray-400">—</span>}
+          <div className="text-gray-700 dark:text-gray-300 max-w-xs">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+              {category}
+            </span>
           </div>
         );
       },
     },
+    // {
+    //   key: "content",
+    //   header: "Content Preview",
+    //   render: (row) => {
+    //     const html = row?.content ?? row?.description ?? "";
+    //     const text = stripHtml(html);
+    //     return (
+    //       <div
+    //         className="text-gray-700 dark:text-gray-300 max-w-2xl line-clamp-2"
+    //         title={text.length > 200 ? text.slice(0, 500) : text}
+    //       >
+    //         {text || <span className="text-gray-400">—</span>}
+    //       </div>
+    //     );
+    //   },
+    // },
     // {
     //   key: "link",
     //   header: "Link",

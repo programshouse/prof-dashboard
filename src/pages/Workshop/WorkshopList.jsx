@@ -136,6 +136,24 @@ export default function WorkshopList({ onEdit, onAdd }) {
           ),
       },
       {
+        key: "video_link",
+        header: "Video Link",
+        render: (row) =>
+          row?.video_link ? (
+            <a
+              href={row.video_link}
+              target="_blank"
+              rel="noreferrer"
+              className="text-green-600 hover:underline break-all"
+              title={row.video_link}
+            >
+              Watch Video
+            </a>
+          ) : (
+            <span className="text-gray-400">—</span>
+          ),
+      },
+      {
         key: "media",
         header: "Media",
         render: (row) => {
