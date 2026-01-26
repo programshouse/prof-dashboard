@@ -17,15 +17,9 @@ const navItems = [
   { name: "Workshops", icon: <MdWork />, path: "/workshop" },
   { name: "Services", icon: <MdBusiness />, path: "/services" },
   { name: "Blogs", icon: <MdArticle />, path: "/blogs" },
-  { name: "Subscribers", icon: <MdGroups />, path: "/subscribers" },
-  { name: "Contact", icon: <MdDescription />, path: "/settings" },
+  { name: "Settings", icon: <MdDescription />, path: "/settings" },
+  { name: "Subscribes", icon: <MdGroups />, path: "/subscribers" },
 ];
-
-function getSortedNavItems(items) {
-  return [...items].sort((a, b) =>
-    (a.name || "").toLowerCase().localeCompare((b.name || "").toLowerCase())
-  );
-}
 
 const AppSidebar = () => {
   const {
@@ -78,12 +72,13 @@ const AppSidebar = () => {
 
   return (
     <aside
-      className={`fixed top-0 left-0 z-50 mt-16 flex h-screen flex-col border-r border-gray-200 bg-brand-600 px-5 text-gray-900 transition-all duration-300 ease-in-out lg:mt-0 dark:border-gray-800 dark:bg-gray-900 ${
+      className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-gray-200 bg-brand-600 px-5 text-gray-900 transition-all duration-300 ease-in-out dark:border-gray-800 dark:bg-gray-900 ${
         isExpanded || isMobileOpen ? "w-[290px]" : isHovered ? "w-[290px]" : "w-[90px]"
-      } ${isMobileOpen ? "translate-x-0" : isMobile ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
+      } ${isMobileOpen ? "translate-x-0" : isMobile ? "-translate-x-full" : "-translate-x-full"} lg:translate-x-0`}
       onMouseEnter={() => !isMobile && !isExpanded && setIsHovered(true)}
       onMouseLeave={() => !isMobile && setIsHovered(false)}
     >
+      <div className="pt-16 h-full flex flex-col">
       <div className="flex py-8 lg:justify-center">
         <Link to="/">
           {showLabels ? (
@@ -126,7 +121,7 @@ const AppSidebar = () => {
 
       <nav className="no-scrollbar flex flex-col overflow-y-auto pb-6 duration-300 ease-linear">
         <ul className="flex flex-col gap-4">
-          {getSortedNavItems(navItems).map((nav, index) => (
+          {navItems.map((nav, index) => (
             <li key={nav.name}>
               {nav.subItems ? (
                 <button
@@ -195,6 +190,7 @@ const AppSidebar = () => {
 
         {showLabels ? <SidebarWidget /> : null}
       </nav>
+      </div>
     </aside>
   );
 };

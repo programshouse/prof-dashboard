@@ -59,7 +59,7 @@ export default function SubscriberList({ onAdd }) {
         )}
       </PageHeader>
 
-      <main className="px-4 pb-24" style={{ minWidth: "1400px" }}>
+      <div className="col-span-12">
         {error && (
           <div className="text-center text-red-600 mb-4">Failed to load subscribers.</div>
         )}
@@ -114,7 +114,7 @@ export default function SubscriberList({ onAdd }) {
             </table>
           </div>
         )}
-      </main>
+      </div>
     </PageLayout>
   );
 }

@@ -135,7 +135,7 @@ export default function ProfileList({ onEdit }) {
   if (loading) {
     return (
       <PageLayout title="Profile List | ProfMSE">
-        <div className="mx-auto w-[1400px] max-w-[1400px] px-4">
+        <div className="col-span-12">
           <PageHeader title="Profile List" description="Manage your professional profile" />
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500 mx-auto" />
@@ -148,7 +148,7 @@ export default function ProfileList({ onEdit }) {
 
   return (
     <PageLayout title="Profile List | ProfMSE">
-      <div className="mx-auto w-[1400px] max-w-[1400px] px-4">
+      <div className="col-span-12">
         <PageHeader title="Profile List" description="Manage your professional profile" />
         <div className="overflow-x-auto rounded-xl border border-brand-200 bg-white dark:bg-gray-800 shadow">
           <AdminTable

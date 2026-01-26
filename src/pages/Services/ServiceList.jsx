@@ -77,14 +77,15 @@ export default function ServiceList({ onEdit, onAdd }) {
     return (
       <PageLayout title="Services Management | ProfMSE">
         <PageHeader title="Services Management" description="Manage services that appear on the website" />
-        <main className="px-4 pb-24">
-          <div className="overflow-hidden rounded-xl border border-brand-200 bg-white shadow">
-            <div className="p-6 animate-pulse space-y-3">
+        <div className="col-span-12">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 text-center">
+            <div className="animate-pulse space-y-3">
               <div className="h-5 w-24 rounded bg-gray-200" />
               <div className="h-10 w-full rounded bg-gray-200" />
             </div>
+            <p className="mt-2 text-gray-600 dark:text-gray-300">Loading services...</p>
           </div>
-        </main>
+        </div>
       </PageLayout>
     );
   }
@@ -93,7 +94,7 @@ export default function ServiceList({ onEdit, onAdd }) {
     <PageLayout title="Services Management | ProfMSE">
       <Toaster position="bottom-right" />
 
-      <main className="px-4 pb-24" style={{ minWidth: "1400px" }}>
+      <div className="col-span-12">
 
           <div className="flex justify-end mb-4">
          
@@ -196,7 +197,7 @@ export default function ServiceList({ onEdit, onAdd }) {
             </table>
           </div>
         )}
-      </main>
+      </div>
     </PageLayout>
   );
 }

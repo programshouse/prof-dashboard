@@ -329,7 +329,7 @@ export default function ProfileForm({ onSuccess }) {
   if (loading) {
     return (
       <PageLayout title="Profile Management | ProfMSE">
-        <div className="mx-auto w-[1400px] max-w-[1400px] px-4">
+        <div className="col-span-12">
           <PageHeader title="Profile Management" description="Edit your professional profile information" />
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500 mx-auto" />
@@ -348,7 +348,7 @@ export default function ProfileForm({ onSuccess }) {
 
   return (
     <PageLayout title={`${isReadOnly ? "View" : form.id ? "Edit" : "Add"} Profile | ProfMSE`}>
-      <div className="mx-auto w-[1400px] max-w-[1400px] px-4">
+      <div className="col-span-12">
         <PageHeader
           title={`${isReadOnly ? "View" : form.id ? "Edit" : "Add"} Profile`}
           description="Keep your professional profile clear and up to date."

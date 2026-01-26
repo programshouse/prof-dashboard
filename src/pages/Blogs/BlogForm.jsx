@@ -24,6 +24,7 @@ export default function BlogFormTiny({
 
   const [title, setTitle] = useState("");
   const [description, setDesc] = useState("");
+  const [category, setCategory] = useState("");
   const [image, setImage] = useState(null); // File | string(url) | null
   const [link, setLink] = useState("");
   const [linkError, setLinkError] = useState("");
@@ -88,6 +89,7 @@ export default function BlogFormTiny({
 
         setTitle(data?.title || "");
         setDesc(data?.content ?? data?.description ?? "");
+        setCategory(data?.category || "");
         // ✅ use "image" from API (not icon)
         setImage(data?.image ?? data?.icon ?? null);
         setLink(data?.link || "");
@@ -114,6 +116,7 @@ export default function BlogFormTiny({
       const fd = new FormData();
       fd.append("title", title.trim());
       fd.append("content", description);
+      fd.append("category", category.trim());
 
       if (link?.trim()) fd.append("link", link.trim());
 
@@ -163,7 +166,7 @@ export default function BlogFormTiny({
       onSubmit={submit}
       onCancel={cancel}
       submitText={isReadOnly ? "Close" : saving ? "Saving..." : resolvedId ? "Update Blog" : "Create Blog"}
-      submitDisabled={isReadOnly ? false : saving || !title.trim() || !description.trim() || !!linkError}
+      submitDisabled={isReadOnly ? false : saving || !title.trim() || !description.trim() || !category.trim() || !!linkError}
     >
       {/* Title */}
       <div className="mb-6">
@@ -183,6 +186,26 @@ export default function BlogFormTiny({
           }`}
         />
         <p className="text-xs text-gray-500 mt-1">{title.length}/140</p>
+      </div>
+
+      {/* Category */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Category *
+        </label>
+        <input
+          name="category"
+          value={category}
+          onChange={(e) => !isReadOnly && setCategory(e.target.value)}
+          required
+          maxLength={50}
+          disabled={isReadOnly}
+          placeholder="e.g., Technology, Business, Lifestyle..."
+          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
+            isReadOnly ? "bg-gray-100 dark:bg-gray-800 cursor-not-allowed" : "border-gray-300 focus:ring-brand-500"
+          }`}
+        />
+        <p className="text-xs text-gray-500 mt-1">{category.length}/50</p>
       </div>
 
       {/* Link (optional) */}

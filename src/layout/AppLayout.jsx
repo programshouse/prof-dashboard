@@ -12,7 +12,7 @@ const ProtectedRoute = ({ children }) => {
 };
 
 const LayoutContent = () => {
-  const { isExpanded, isHovered, isMobileOpen, isMobile } = useSidebar();
+  const { isExpanded, isHovered, isMobileOpen } = useSidebar();
 
   return (
     <div className="min-h-screen xl:flex">
@@ -34,9 +34,9 @@ const LayoutContent = () => {
       </div>
       <div
         className={`flex-1 transition-all duration-300 ease-in-out ${
-          isMobile ? "ml-[90px]" :
-          isExpanded || isHovered ? "lg:ml-[280px] xl:ml-[290px]" : "lg:ml-[70px] xl:ml-[90px]"
-        } ${isMobileOpen ? "ml-0" : ""}`}
+          isExpanded || isHovered ? "lg:pl-[290px]" : "lg:pl-[90px]"
+        } ${isMobileOpen ? "pl-0" : "pl-0"}
+        pt-16`}
       >
         <AppHeader />
         <div className="mx-auto">
