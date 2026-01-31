@@ -220,7 +220,9 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
                 className={`${inputCls} ${disabledCls}`}
                 required
                 disabled={disabled}
+                maxLength={100}
               />
+              <p className="text-xs text-gray-500 mt-1">{form.title.length}/100</p>
             </div>
 
             {/* Description */}
@@ -304,6 +306,7 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
                 disabled={disabled}
                 maxLength={255}
               />
+              <p className="text-xs text-gray-500 mt-1">{form.alt.length}/255</p>
             </div>
 
             {/* Image File */}

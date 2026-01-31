@@ -227,6 +227,7 @@ export default function BlogFormTiny({
             isReadOnly ? "bg-gray-100 dark:bg-gray-800 cursor-not-allowed" : "border-gray-300 focus:ring-brand-500"
           }`}
         />
+        <p className="text-xs text-gray-500 mt-1">{alt.length}/255</p>
       </div>
 
       {/* Link (optional) */}

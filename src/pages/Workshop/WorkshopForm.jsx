@@ -554,6 +554,7 @@ export default function WorkshopForm({ onSuccess, workshopId }) {
                   placeholder="Describe the image for screen readers"
                   maxLength={255}
                 />
+                <p className="text-xs text-gray-500 mt-1">{form.alt.length}/255</p>
               </div>
 
               {/* Active row */}

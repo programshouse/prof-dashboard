@@ -121,6 +121,7 @@ export default function SubscriberForm({ subscriberId, initialValues, onSuccess 
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 maxLength={255}
               />
+              <p className="text-xs text-gray-500 mt-1">{form.alt.length}/255</p>
             </div>
           </AdminForm>
         )}
