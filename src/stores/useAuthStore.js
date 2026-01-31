@@ -104,6 +104,8 @@ export const useAuthStore = create((set) => ({
       localStorage.removeItem("expiry_time");
       set({ admin: null, access_token: null });
       toast.error("⏰ Session expired, please login again!");
+      // Redirect to signin page
+      window.location.href = '/signin';
       return false;
     }
     return true;
@@ -115,6 +117,8 @@ export const useAuthStore = create((set) => ({
     localStorage.removeItem("admin");
     localStorage.removeItem("expiry_time");
     set({ admin: null, access_token: null, profile: null, error: null });
+    // Redirect to signin page
+    window.location.href = '/signin';
   },
 
   // ---- INIT FROM STORAGE ----

@@ -27,7 +27,6 @@ const ALLOWED_IMAGE_EXT = new Set(["png", "jpg", "jpeg", "webp", "svg", "gif"]);
 const getExt = (name = "") => name.split(".").pop()?.toLowerCase() || "";
 
 const MAX_TITLE = 80;
-const MAX_DESC = 600;
 const MAX_FEATURES = 12;
 
 const INITIAL = {
@@ -263,7 +262,6 @@ export default function ProfileForm({ onSuccess }) {
     if (form.title.length > MAX_TITLE) m.title = `Max ${MAX_TITLE} chars`;
 
     if (!form.description.trim()) m.description = "Required";
-    if (form.description.length > MAX_DESC) m.description = `Max ${MAX_DESC} chars`;
 
     if ((form.features || []).length > MAX_FEATURES) m.features = `Max ${MAX_FEATURES}`;
     return m;
@@ -409,7 +407,6 @@ export default function ProfileForm({ onSuccess }) {
                   value={form.description}
                   onChange={onText}
                   rows={5}
-                  maxLength={MAX_DESC}
                   className={`${inputCls} ${disabledCls}`}
                   required
                   disabled={isReadOnly}

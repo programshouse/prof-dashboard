@@ -41,8 +41,7 @@ const ALLOWED_IMAGE_EXT = new Set(["png", "jpg", "jpeg", "webp", "svg", "gif"]);
 const getExt = (name = "") => name.split(".").pop()?.toLowerCase() || "";
 
 /* ---------- Limits ---------- */
-const MAX_TITLE = 80;
-const MAX_DESC = 600;
+const MAX_TITLE = 100;
 
 /* ---------- Initial state ---------- */
 const INITIAL = {
@@ -289,7 +288,6 @@ export default function WorkshopForm({ onSuccess, workshopId }) {
     if (form.title.length > MAX_TITLE) m.title = `Max ${MAX_TITLE} chars`;
 
     if (!form.description.trim()) m.description = "Required";
-    if (form.description.length > MAX_DESC) m.description = `Max ${MAX_DESC} chars`;
 
     if (form.link?.trim() && !/^https?:\/\//i.test(form.link.trim())) {
       m.link = "Link must start with http:// or https://";
@@ -452,6 +450,7 @@ export default function WorkshopForm({ onSuccess, workshopId }) {
                   required
                   disabled={isReadOnly}
                 />
+                <p className="text-xs text-gray-500 mt-1">{form.title.length}/{MAX_TITLE}</p>
                 {vErrs.title && <p className="text-xs text-red-600 mt-1">{vErrs.title}</p>}
               </div>
 
@@ -465,7 +464,6 @@ export default function WorkshopForm({ onSuccess, workshopId }) {
                   value={form.description}
                   onChange={onText}
                   rows={5}
-                  maxLength={MAX_DESC}
                   className={`${inputCls} ${disabledCls}`}
                   required
                   disabled={isReadOnly}

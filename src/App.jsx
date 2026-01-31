@@ -105,7 +105,7 @@ export default function App() {
     checkSession();
     const interval = setInterval(() => {
       checkSession();
-    },24* 60 * 1000);
+    }, 5 * 60 * 1000); // Check every 5 minutes
     return () => clearInterval(interval);
   }, [checkSession, loadUserFromStorage]);
 
