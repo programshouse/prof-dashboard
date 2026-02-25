@@ -18,10 +18,11 @@ const isFileLike = (v) =>
 const isFormData = (v) =>
   typeof FormData !== "undefined" && v instanceof FormData;
 
-const getExt = (name = "") => (name.includes(".") ? name.split(".").pop().toLowerCase() : "");
+const getExt = (name = "") =>
+  name.includes(".") ? name.split(".").pop().toLowerCase() : "";
 
 const ALLOWED_IMAGE_MIME = new Set([
-  "image/jpeg", // jpg, jpeg
+  "image/jpeg",
   "image/png",
   "image/gif",
   "image/webp",
@@ -29,61 +30,95 @@ const ALLOWED_IMAGE_MIME = new Set([
 ]);
 const ALLOWED_IMAGE_EXT = new Set(["jpg", "jpeg", "png", "gif", "webp", "svg"]);
 
-const VIDEO_EXT = new Set(["mp4", "mov", "m4v", "webm", "mkv", "avi", "wmv", "flv", "mpeg", "mpg", "3gp", "ogg", "ogv"]);
+const VIDEO_EXT = new Set([
+  "mp4",
+  "mov",
+  "m4v",
+  "webm",
+  "mkv",
+  "avi",
+  "wmv",
+  "flv",
+  "mpeg",
+  "mpg",
+  "3gp",
+  "ogg",
+  "ogv",
+]);
 
 /** Ensure file has a name; assign one based on mime/ext if needed */
 const ensureNamedFile = (fileOrBlob, fallbackBase = "upload") => {
   if (typeof File !== "undefined" && fileOrBlob instanceof File) return fileOrBlob;
-  // Blob without a name -> wrap into File with an inferred extension
+
   const type = fileOrBlob.type || "";
   let ext = "bin";
   if (type && type.includes("/")) {
     const maybe = type.split("/").pop().toLowerCase();
-    // map svg+xml -> svg
     ext = maybe === "svg+xml" ? "svg" : maybe;
   }
+
   try {
     return new File([fileOrBlob], `${fallbackBase}.${ext}`, { type });
   } catch {
-    // Older browsers may not support new File from Blob
     return fileOrBlob;
   }
 };
 
-/** Validate image file is one of the allowed formats */
 const assertValidImage = (file) => {
   const f = ensureNamedFile(file, "image");
   const okMime = f.type ? ALLOWED_IMAGE_MIME.has(f.type) : false;
-  const okExt  = ALLOWED_IMAGE_EXT.has(getExt(f.name));
+  const okExt = ALLOWED_IMAGE_EXT.has(getExt(f.name));
   if (!okMime && !okExt) {
     throw new Error("Image must be a file of type: jpg, jpeg, png, gif, webp, svg.");
   }
   return f;
 };
 
-/** Validate video looks like a video */
 const assertValidVideo = (file) => {
   const f = ensureNamedFile(file, "video");
   const ext = getExt(f.name);
   const okMime = f.type?.startsWith("video/");
-  const okExt  = VIDEO_EXT.has(ext);
+  const okExt = VIDEO_EXT.has(ext);
   if (!okMime && !okExt) {
     throw new Error("Please choose a valid video file.");
   }
   return f;
 };
 
+/* ---------- IMPORTANT: normalize keys (camelCase -> snake_case where needed) ---------- */
+const normalizeBodyKeys = (body) => {
+  if (!body || typeof body !== "object" || isFormData(body)) return body;
+
+  const out = { ...body };
+
+  // If the form uses camelCase, convert it to what your API expects
+  if (out.videoLink != null && out.video_link == null) {
+    out.video_link = out.videoLink;
+    delete out.videoLink;
+  }
+
+  // optional extra safety (if you used a different name before)
+  if (out.videoLinkUrl != null && out.video_link == null) {
+    out.video_link = out.videoLinkUrl;
+    delete out.videoLinkUrl;
+  }
+
+  return out;
+};
+
 /**
  * Convert plain object with File/Blob values to FormData.
- * Enforces:
- *  - image/img/avatar/photo keys -> image formats only (jpg/jpeg/png/gif/webp/svg)
- *  - video/vid keys -> video files only
  */
 const autoFormData = (body) => {
   if (!body || typeof body !== "object" || isFormData(body)) return body;
 
   let hasFile = false;
-  for (const k in body) if (isFileLike(body[k])) { hasFile = true; break; }
+  for (const k in body) {
+    if (isFileLike(body[k])) {
+      hasFile = true;
+      break;
+    }
+  }
   if (!hasFile) return body;
 
   const fd = new FormData();
@@ -91,16 +126,14 @@ const autoFormData = (body) => {
     if (v === undefined || v === null) return;
 
     if (isFileLike(v)) {
-      // normalize per key
       const keyLower = k.toLowerCase();
       let file = v;
 
       if (/(^|_)(image|img|photo|avatar)(_|$)/.test(keyLower)) {
-        file = assertValidImage(v); // throws if not allowed
+        file = assertValidImage(v);
       } else if (/(^|_)(video|vid)(_|$)/.test(keyLower)) {
-        file = assertValidVideo(v); // throws if not video
+        file = assertValidVideo(v);
       } else {
-        // Other file keys: don't block, but keep as File/Blob
         file = ensureNamedFile(v);
       }
 
@@ -120,18 +153,12 @@ const autoFormData = (body) => {
 
 const buildHeaders = (body) => {
   const base = { ...authHeaders(), Accept: "application/json" };
-  if (isFormData(body)) {
-    // Let the browser/axios set multipart boundary
-    return base;
-  }
+  if (isFormData(body)) return base; // axios sets boundary automatically
   return { ...base, "Content-Type": "application/json" };
 };
 
-// Normalize API responses that may return either a single object or an array
 const toList = (data) => {
-  // common wrappers
   const payload = data?.data ?? data?.items ?? data?.result ?? data;
-
   if (Array.isArray(payload)) return payload;
   if (payload && typeof payload === "object") return [payload];
   return [];
@@ -148,15 +175,21 @@ export const useWhoAmIStore = create((set, get) => ({
   async create(body) {
     set({ loading: true, error: null });
     try {
-      const payload = autoFormData(body);
+      const normalized = normalizeBodyKeys(body);
+      const payload = autoFormData(normalized);
       const headers = buildHeaders(payload);
+
       const { data } = await api.post("", payload, { headers });
       const created = data?.data ?? data;
+
       set({ created, loading: false });
       await get().fetchAll();
       return created;
     } catch (err) {
-      set({ error: err?.response?.data?.message || err?.message || "Failed to create", loading: false });
+      set({
+        error: err?.response?.data?.message || err?.message || "Failed to create",
+        loading: false,
+      });
       throw err;
     }
   },
@@ -166,31 +199,34 @@ export const useWhoAmIStore = create((set, get) => ({
       typeof idOrObj === "string" || typeof idOrObj === "number"
         ? idOrObj
         : idOrObj?.id;
+
     const rawBody = maybeBody ?? (typeof idOrObj === "object" ? idOrObj : {});
     if (!id) throw new Error("update: missing id");
 
     set({ loading: true, error: null });
     try {
-      const payload = autoFormData(rawBody);
+      const normalized = normalizeBodyKeys(rawBody);
+      const payload = autoFormData(normalized);
       const headers = buildHeaders(payload);
 
-      // If sending files, use Laravel-friendly method override for PATCH with multipart
       let resp;
       if (isFormData(payload)) {
-        // Laravel accepts POST with _method=PATCH when multipart is required
         payload.append("_method", "PATCH");
         resp = await api.post(`/${id}`, payload, { headers });
       } else {
         resp = await api.patch(`/${id}`, payload, { headers });
       }
 
-      const data = resp.data;
-      const updated = data?.data ?? data;
+      const updated = resp.data?.data ?? resp.data;
+
       set({ updated, loading: false });
       await get().fetchAll();
       return updated;
     } catch (err) {
-      set({ error: err?.response?.data?.message || err?.message || "Failed to update", loading: false });
+      set({
+        error: err?.response?.data?.message || err?.message || "Failed to update",
+        loading: false,
+      });
       throw err;
     }
   },
@@ -209,7 +245,10 @@ export const useWhoAmIStore = create((set, get) => ({
       await get().fetchAll();
       return data?.data ?? data;
     } catch (err) {
-      set({ error: err?.response?.data?.message || "Failed to delete", loading: false });
+      set({
+        error: err?.response?.data?.message || "Failed to delete",
+        loading: false,
+      });
       throw err;
     }
   },
@@ -222,7 +261,10 @@ export const useWhoAmIStore = create((set, get) => ({
       set({ items: list, loading: false });
       return list;
     } catch (err) {
-      set({ error: err?.response?.data?.message || "Failed to fetch", loading: false });
+      set({
+        error: err?.response?.data?.message || "Failed to fetch",
+        loading: false,
+      });
       throw err;
     }
   },
@@ -236,7 +278,10 @@ export const useWhoAmIStore = create((set, get) => ({
       set({ item, loading: false });
       return item;
     } catch (err) {
-      set({ error: err?.response?.data?.message || "Failed to get item", loading: false });
+      set({
+        error: err?.response?.data?.message || "Failed to get item",
+        loading: false,
+      });
       throw err;
     }
   },

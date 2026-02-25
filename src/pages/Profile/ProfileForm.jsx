@@ -34,6 +34,7 @@ const INITIAL = {
   title: "",
   description: "",
   alt: "",
+  video_link: "",
   features: [],
 
   imageFile: null,
@@ -97,6 +98,7 @@ export default function ProfileForm({ onSuccess }) {
           title: src?.title || "",
           description: src?.description || "",
           alt: src?.alt || "",
+          video_link: src?.video_link || "",
           features: Array.isArray(src?.features) ? src.features : [],
           imgExistingUrl: src?.image || "",
           vidExistingUrl: src?.video || "",
@@ -290,6 +292,7 @@ export default function ProfileForm({ onSuccess }) {
       fd.append("title", form.title.trim());
       fd.append("description", form.description.trim());
       fd.append("alt", form.alt.trim());
+      fd.append("video_link", (form.video_link || "").trim());
       (form.features || []).forEach((feat) => fd.append("features[]", feat));
 
       // delete flags
@@ -413,6 +416,21 @@ export default function ProfileForm({ onSuccess }) {
                   placeholder="Brief summary of expertise and outcomes."
                 />
                 {vErrs.description && <p className="text-xs text-red-600 mt-1">{vErrs.description}</p>}
+              </div>
+
+              {/* Video Link row */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Video Link
+                </label>
+                <input
+                  name="video_link"
+                  value={form.video_link}
+                  onChange={onText}
+                  className={`${inputCls} ${disabledCls}`}
+                  disabled={isReadOnly}
+                  placeholder="https://example.com/video"
+                />
               </div>
             </div>
 

@@ -7,7 +7,6 @@ import Button from "../../components/ui/button/Button";
 import Toaster, { notify } from "../../components/ui/Toaster/Toaster";
 import { useServicesStore } from "../../stores/useServicesStore";
 
-// Build absolute URLs when API returns relative image paths
 const makeImageUrl = (path) => {
   if (!path) return null;
   if (/^(https?:|data:|\/\/)/i.test(path)) return path;
@@ -19,24 +18,24 @@ export default function ServiceDetails() {
   const navigate = useNavigate();
 
   const fetchServiceById = useServicesStore((s) => s.fetchServiceById);
-  const updateService    = useServicesStore((s) => s.updateService);   // updateService(id, body)
-  const deleteService    = useServicesStore((s) => s.deleteService);   // deleteService(id)
+  const updateService = useServicesStore((s) => s.updateService);
+  const deleteService = useServicesStore((s) => s.deleteService);
 
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving]   = useState(false);
-  const [error, setError]     = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
   const [editMode, setEditMode] = useState(false);
 
-  // local copy for show/edit
   const [svc, setSvc] = useState(null);
 
-  // form state (prefilled when toggling to edit mode)
   const [form, setForm] = useState({
     title: "",
     description: "",
     link: "",
-    image: "", // URL string (JSON-only version)
+    video_link: "", // ✅ added
+    image: "",
   });
+
   const [linkError, setLinkError] = useState("");
 
   useEffect(() => {
@@ -53,12 +52,14 @@ export default function ServiceDetails() {
         setError("");
         const data = await fetchServiceById(id);
         if (!mounted) return;
+
         setSvc(data || null);
-        // seed form so switching to edit is instant
+
         setForm({
           title: data?.title ?? "",
           description: data?.description ?? "",
           link: data?.link ?? "",
+          video_link: data?.video_link ?? "", // ✅ added
           image: typeof data?.image === "string" ? data.image : "",
         });
       } catch (e) {
@@ -69,13 +70,18 @@ export default function ServiceDetails() {
       }
     })();
 
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [id, fetchServiceById]);
 
   const imageUrl = useMemo(() => makeImageUrl(svc?.image || ""), [svc]);
 
   const validateLink = (val) => {
-    if (!val) { setLinkError(""); return true; }
+    if (!val) {
+      setLinkError("");
+      return true;
+    }
     try {
       const u = new URL(val);
       if (!/^https?:$/.test(u.protocol)) throw new Error("Invalid protocol");
@@ -101,13 +107,14 @@ export default function ServiceDetails() {
 
     try {
       setSaving(true);
-      // IMPORTANT: pass id separately; do NOT include it in body
       const body = {
         title: form.title?.trim(),
         description: form.description?.trim(),
         link: form.link?.trim() || null,
-        ...(form.image ? { image: form.image } : {}), // JSON-only preview
+        video_link: form.video_link?.trim() || null, // ✅ added
+        ...(form.image ? { image: form.image } : {}),
       };
+
       const updated = await updateService(id, body);
       setSvc(updated);
       notify.action("update").success("Service updated");
@@ -124,7 +131,7 @@ export default function ServiceDetails() {
     if (!id) return setError("Missing service id");
     if (!window.confirm("Delete this service? This cannot be undone.")) return;
     try {
-      await deleteService(id); // pass id directly
+      await deleteService(id);
       notify.action("delete").success("Service deleted");
       navigate("/services");
     } catch (e) {
@@ -148,7 +155,9 @@ export default function ServiceDetails() {
     return (
       <PageLayout title="Service Details | ProfMSE">
         <PageHeader title="Service Details" description="View and edit a service">
-          <Link to="/services"><Button variant="secondary">← Back to list</Button></Link>
+          <Link to="/services">
+            <Button variant="secondary">← Back to list</Button>
+          </Link>
         </PageHeader>
         <div className="mx-auto max-w-3xl px-4">
           <div className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-700 dark:border-red-700/40 dark:bg-red-900/20 dark:text-red-300">
@@ -163,19 +172,24 @@ export default function ServiceDetails() {
     <PageLayout title={`${svc?.title || "Service"} | ProfMSE`}>
       <Toaster position="bottom-right" />
 
-      <PageHeader
-        title={svc?.title || "Service Details"}
-        description="View and edit a service"
-      >
+      <PageHeader title={svc?.title || "Service Details"} description="View and edit a service">
         <div className="flex gap-2">
-          <Link to="/services"><Button variant="secondary">← Back</Button></Link>
+          <Link to="/services">
+            <Button variant="secondary">← Back</Button>
+          </Link>
           {!editMode ? (
             <>
-              <Button onClick={() => setEditMode(true)} variant="primary">Edit</Button>
-              <Button onClick={onDelete} variant="danger">Delete</Button>
+              <Button onClick={() => setEditMode(true)} variant="primary">
+                Edit
+              </Button>
+              <Button onClick={onDelete} variant="danger">
+                Delete
+              </Button>
             </>
           ) : (
-            <Button onClick={() => setEditMode(false)} variant="secondary">Cancel</Button>
+            <Button onClick={() => setEditMode(false)} variant="secondary">
+              Cancel
+            </Button>
           )}
         </div>
       </PageHeader>
@@ -203,13 +217,22 @@ export default function ServiceDetails() {
 
               {svc?.link && (
                 <p className="pt-2">
+                  <a className="text-brand-600 hover:underline break-all" href={svc.link} target="_blank" rel="noreferrer">
+                    {svc.link}
+                  </a>
+                </p>
+              )}
+
+              {/* ✅ Video Link display */}
+              {svc?.video_link && (
+                <p className="pt-2">
                   <a
                     className="text-brand-600 hover:underline break-all"
-                    href={svc.link}
+                    href={svc.video_link}
                     target="_blank"
                     rel="noreferrer"
                   >
-                    {svc.link}
+                    {svc.video_link}
                   </a>
                 </p>
               )}
@@ -268,6 +291,23 @@ export default function ServiceDetails() {
                 pattern="https?://.*"
               />
               {linkError && <p className="mt-1 text-xs text-red-600">{linkError}</p>}
+            </div>
+
+            {/* ✅ Video Link (optional) */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Video Link (optional)
+              </label>
+              <input
+                type="url"
+                name="video_link"
+                value={form.video_link}
+                onChange={onChange}
+                placeholder="https://example.com/video"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                inputMode="url"
+                pattern="https?://.*"
+              />
             </div>
 
             {/* Image URL (JSON-only version) */}

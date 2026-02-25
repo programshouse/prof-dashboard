@@ -1,6 +1,6 @@
+// /src/pages/Services/ServiceForm.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import PageLayout from "../../components/ui/PageLayout";
 import PageHeader from "../../components/ui/PageHeader";
 import AdminForm from "../../components/ui/AdminForm";
 import { useServicesStore } from "../../stores/useServicesStore";
@@ -8,7 +8,11 @@ import { useServicesStore } from "../../stores/useServicesStore";
 const getId = (x) => x?.id ?? x?._id ?? x?.uuid ?? null;
 
 const ALLOWED_IMAGE_MIME = new Set([
-  "image/png", "image/jpeg", "image/webp", "image/svg+xml", "image/gif",
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "image/svg+xml",
+  "image/gif",
 ]);
 const ALLOWED_IMAGE_EXT = new Set(["png", "jpg", "jpeg", "webp", "svg", "gif"]);
 const getExt = (name = "") => name.split(".").pop()?.toLowerCase() || "";
@@ -16,30 +20,39 @@ const getExt = (name = "") => name.split(".").pop()?.toLowerCase() || "";
 export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
   const [search] = useSearchParams();
   const qsId = search.get("id");
-  const isReadOnly = search.get("readonly") === "1" || search.get("mode") === "view";
+  const isReadOnly =
+    search.get("readonly") === "1" || search.get("mode") === "view";
   const serviceId = getId({ id: propServiceId ?? qsId });
 
   const [form, setForm] = useState({
     title: "",
     description: "",
     link: "",
+    video_link: "", // ✅ added
     alt: "",
-    features: [],          // Array of feature strings
-    imageFile: null,       // File only
-    imageExistingUrl: "",  // when editing, show existing image
+    features: [],
+    imageFile: null,
+    imageExistingUrl: "",
   });
+
   const [loading, setLoading] = useState(Boolean(serviceId));
   const [saving, setSaving] = useState(false);
   const [linkErr, setLinkErr] = useState("");
+  const [videoLinkErr, setVideoLinkErr] = useState("");
   const [imgErr, setImgErr] = useState("");
   const [serverErr, setServerErr] = useState("");
 
   const fetchServiceById = useServicesStore((s) => s.fetchServiceById);
-  const createService    = useServicesStore((s) => s.createService);
-  const updateService    = useServicesStore((s) => s.updateService);
+  const createService = useServicesStore((s) => s.createService);
+  const updateService = useServicesStore((s) => s.updateService);
 
   const blobs = useRef({ img: null });
-  const revoke = () => { if (blobs.current.img) { URL.revokeObjectURL(blobs.current.img); blobs.current.img = null; } };
+  const revoke = () => {
+    if (blobs.current.img) {
+      URL.revokeObjectURL(blobs.current.img);
+      blobs.current.img = null;
+    }
+  };
 
   // Load existing
   useEffect(() => {
@@ -57,6 +70,7 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
           title: data?.title ?? "",
           description: data?.description ?? "",
           link: data?.link ?? "",
+          video_link: data?.video_link ?? "", // ✅ added
           alt: data?.alt ?? "",
           features: Array.isArray(data?.features) ? data.features : [],
           imageExistingUrl: typeof data?.image === "string" ? data.image : "",
@@ -85,33 +99,46 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
   }, [form.imageFile, form.imageExistingUrl]);
 
   // Validation
-  const validateLink = (val) => {
-    if (!val) { setLinkErr(""); return true; }
+  const validateUrl = (val, setter) => {
+    if (!val) {
+      setter("");
+      return true;
+    }
     try {
       const u = new URL(val);
       if (!/^https?:$/i.test(u.protocol)) throw new Error("bad");
-      setLinkErr("");
+      setter("");
       return true;
     } catch {
-      setLinkErr("Please enter a valid URL starting with http:// or https://");
+      setter("Please enter a valid URL starting with http:// or https://");
       return false;
     }
   };
 
+  const validateLink = (val) => validateUrl(val, setLinkErr);
+  const validateVideoLink = (val) => validateUrl(val, setVideoLinkErr);
+
   // Handlers
   const onText = (e) => {
     const { name, value } = e.target;
+
     if (name === "link") validateLink(value);
+    if (name === "video_link") validateVideoLink(value);
+
     setForm((p) => ({ ...p, [name]: value }));
   };
 
   const onPickImg = (e) => {
     const f = e.target.files?.[0] || null;
-    if (!f) { setImgErr(""); setForm(p => ({ ...p, imageFile: null })); return; }
+    if (!f) {
+      setImgErr("");
+      setForm((p) => ({ ...p, imageFile: null }));
+      return;
+    }
 
     const ext = getExt(f.name);
     const okByType = ALLOWED_IMAGE_MIME.has(f.type);
-    const okByExt  = ALLOWED_IMAGE_EXT.has(ext);
+    const okByExt = ALLOWED_IMAGE_EXT.has(ext);
 
     if (!okByType && !okByExt) {
       setImgErr("Image must be PNG, JPG/JPEG, WEBP, SVG, or GIF.");
@@ -122,7 +149,10 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
     setForm((p) => ({ ...p, imageFile: f }));
   };
 
-  const clearImg = () => { setForm((p) => ({ ...p, imageFile: null })); revoke(); };
+  const clearImg = () => {
+    setForm((p) => ({ ...p, imageFile: null }));
+    revoke();
+  };
 
   // Features handlers
   const addFeature = () => {
@@ -145,22 +175,26 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isReadOnly) { onSuccess && onSuccess(); return; }
-    if (saving || linkErr || imgErr) return;
+    if (isReadOnly) {
+      onSuccess && onSuccess();
+      return;
+    }
+    if (saving || linkErr || videoLinkErr || imgErr) return;
     if (!form.title.trim() || !form.description.trim()) return;
+    if (!validateLink(form.link)) return;
+    if (!validateVideoLink(form.video_link)) return;
 
     try {
       setSaving(true);
       setServerErr("");
 
-      // Pass a plain object; store will convert to FormData because imageFile is a File.
       const body = {
         title: form.title.trim(),
         description: form.description.trim(),
         link: form.link?.trim() || "",
+        video_link: form.video_link?.trim() || "", // ✅ added
         alt: form.alt?.trim() || "",
-        features: form.features.filter(f => f.trim() !== ""), // Filter out empty features
-        // Only send image if new file is selected, otherwise don't send image field to preserve existing
+        features: form.features.filter((f) => f.trim() !== ""),
         ...(form.imageFile instanceof File ? { image: form.imageFile } : {}),
       };
 
@@ -170,7 +204,8 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
       onSuccess && onSuccess();
     } catch (err) {
       console.error(err);
-      const msg = err?.response?.data?.message || err?.message || "Error saving service.";
+      const msg =
+        err?.response?.data?.message || err?.message || "Error saving service.";
       setServerErr(msg);
     } finally {
       setSaving(false);
@@ -202,7 +237,7 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
             submitText={
               isReadOnly ? "Close" : saving ? "Saving..." : serviceId ? "Update Service" : "Create Service"
             }
-            submitDisabled={isReadOnly ? false : saving || !!linkErr || !!imgErr}
+            submitDisabled={isReadOnly ? false : saving || !!linkErr || !!videoLinkErr || !!imgErr}
           >
             {!!serverErr && (
               <div className="mb-4 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-700/40 dark:bg-red-900/20 dark:text-red-300">
@@ -212,7 +247,9 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
 
             {/* Title */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Service Title *</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Service Title *
+              </label>
               <input
                 name="title"
                 value={form.title}
@@ -227,7 +264,9 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
 
             {/* Description */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description *</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Description *
+              </label>
               <textarea
                 name="description"
                 value={form.description}
@@ -278,14 +317,22 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
 
             {/* Link (optional) */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Link (optional)</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Link (optional)
+              </label>
               <input
                 type="url"
                 name="link"
                 value={form.link}
                 onChange={onText}
                 placeholder="https://example.com/service"
-                className={`${inputCls} ${disabled ? "border-gray-200 dark:border-gray-700" : linkErr ? "border-red-500 focus:ring-red-400" : "border-gray-300 focus:ring-brand-500"}`}
+                className={`${inputCls} ${
+                  disabled
+                    ? "border-gray-200 dark:border-gray-700"
+                    : linkErr
+                    ? "border-red-500 focus:ring-red-400"
+                    : "border-gray-300 focus:ring-brand-500"
+                }`}
                 inputMode="url"
                 pattern="https?://.*"
                 disabled={disabled}
@@ -293,9 +340,36 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
               {linkErr && <p className="mt-1 text-xs text-red-600">{linkErr}</p>}
             </div>
 
+            {/* Video Link (optional) */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Video Link (optional)
+              </label>
+              <input
+                type="url"
+                name="video_link"
+                value={form.video_link}
+                onChange={onText}
+                placeholder="https://example.com/video"
+                className={`${inputCls} ${
+                  disabled
+                    ? "border-gray-200 dark:border-gray-700"
+                    : videoLinkErr
+                    ? "border-red-500 focus:ring-red-400"
+                    : "border-gray-300 focus:ring-brand-500"
+                }`}
+                inputMode="url"
+                pattern="https?://.*"
+                disabled={disabled}
+              />
+              {videoLinkErr && <p className="mt-1 text-xs text-red-600">{videoLinkErr}</p>}
+            </div>
+
             {/* Alt Text */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Alt Text (for image accessibility)</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Alt Text (for image accessibility)
+              </label>
               <input
                 type="text"
                 name="alt"
@@ -310,7 +384,7 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
             </div>
 
             {/* Image File */}
-            <div className={isReadOnly ? "  pointer-events-none" : ""}>
+            <div className={isReadOnly ? "pointer-events-none" : ""}>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Image (PNG/JPG/JPEG/WEBP/SVG/GIF)
               </label>
@@ -329,7 +403,9 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
                     src={imgPreview}
                     alt="Preview"
                     className="h-16 w-16 rounded object-cover border border-gray-200 dark:border-gray-700"
-                    onError={(e) => { e.currentTarget.style.visibility = "hidden"; }}
+                    onError={(e) => {
+                      e.currentTarget.style.visibility = "hidden";
+                    }}
                   />
                   {!isReadOnly && form.imageFile && (
                     <button
