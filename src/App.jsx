@@ -41,6 +41,7 @@ import Home from "./pages/Dashboard/Home";
 import Profile from "./pages/Profile";
 import Workshop from "./pages/Workshop";
 import Services from "./pages/Services";
+import Tools from "./pages/Tools";
 import Blogs from "./pages/Blogs";
 import Subscribers from "./pages/Subscribers";
 import Form from "./pages/Form";
@@ -65,6 +66,8 @@ const router = createBrowserRouter([
           { path: "/workshop/form", element: <Workshop /> },
           { path: "/services", element: <Services /> },
           { path: "/services/form", element: <Services /> },
+          { path: "/tools", element: <Tools /> },
+          { path: "/tools/form", element: <Tools /> },
           { path: "/blogs", element: <Blogs /> },
           { path: "/blogs/form", element: <Blogs /> },
           { path: "/subscribers", element: <Subscribers /> },
