@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import SubscriberList from "./subscriberList";
 import SubscriberForm from "./subscriberForm";
 
 export default function Subscribers() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
 
@@ -12,7 +13,10 @@ export default function Subscribers() {
 
   const onAdd = () => { setEditingItem(null); setShowForm(true); };
   const onEdit = (subscriber) => { setEditingItem(subscriber); setShowForm(true); };
-  const onSuccess = () => { setShowForm(false); setEditingItem(null); };
+  const onSuccess = () => { setShowForm(false); setEditingItem(null);
+    // Leave the /form URL so Close / Cancel really close the form
+    navigate("/subscribers");
+  };
 
   if (isForm) {
     return (

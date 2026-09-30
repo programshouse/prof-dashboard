@@ -21,7 +21,7 @@ export default function ErrorLayout({
       <PageMeta title={`${code} | Prof`} description={title} />
 
       <div className="relative z-1 flex min-h-screen flex-col bg-white lg:flex-row">
-      
+
         
 
         {/* ---------- Content panel ---------- */}

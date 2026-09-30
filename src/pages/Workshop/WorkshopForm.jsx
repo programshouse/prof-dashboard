@@ -306,7 +306,7 @@ export default function WorkshopForm({ onSuccess, workshopId }) {
     e.preventDefault();
 
     if (isReadOnly) {
-      onSuccess ? onSuccess() : navigate("/workshops");
+      onSuccess ? onSuccess() : navigate("/workshop");
       return;
     }
     if (disabledSubmit) return;
@@ -359,7 +359,7 @@ export default function WorkshopForm({ onSuccess, workshopId }) {
         remove_video: false,
       }));
 
-      onSuccess ? onSuccess() : navigate("/workshops");
+      onSuccess ? onSuccess() : navigate("/workshop");
     } catch (e2) {
       console.error(e2);
       setErr(e2?.response?.data?.message || "Error saving workshop.");
@@ -404,7 +404,7 @@ export default function WorkshopForm({ onSuccess, workshopId }) {
                 try {
                   setSaving(true);
                   await deleteworkshop(form.id);
-                  onSuccess ? onSuccess() : navigate("/workshops");
+                  onSuccess ? onSuccess() : navigate("/workshop");
                 } finally {
                   setSaving(false);
                 }
@@ -416,7 +416,7 @@ export default function WorkshopForm({ onSuccess, workshopId }) {
             </Button>
           )}
 
-          <Button variant="secondary" onClick={() => navigate("/workshops")} className="mr-3">
+          <Button variant="secondary" onClick={() => navigate("/workshop")} className="mr-3">
             Back to List
           </Button>
         </PageHeader>
@@ -431,7 +431,7 @@ export default function WorkshopForm({ onSuccess, workshopId }) {
           <AdminForm
             title="Workshop Information"
             onSubmit={submit}
-            onCancel={() => (onSuccess ? onSuccess() : navigate("/workshops"))}
+            onCancel={() => (onSuccess ? onSuccess() : navigate("/workshop"))}
             submitText={isReadOnly ? "Close" : saving ? "Saving…" : form.id ? "Update Workshop" : "Create Workshop"}
             submitDisabled={disabledSubmit}
           >

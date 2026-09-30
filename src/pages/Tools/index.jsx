@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import ToolForm from "./ToolForm";
 import ToolList from "./ToolList";
 
@@ -7,6 +7,7 @@ const getId = (x) => x?.id ?? x?._id ?? x?.uuid ?? null;
 
 export default function Tools() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [editingTool, setEditingTool] = useState(null);
 
@@ -26,6 +27,8 @@ export default function Tools() {
   const handleFormSuccess = () => {
     setShowForm(false);
     setEditingTool(null);
+    // Leave the /form URL so Close / Cancel really close the form
+    navigate("/tools");
   };
 
   if (isForm) {

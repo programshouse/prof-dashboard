@@ -32,7 +32,7 @@ export default function SettingsList({ onEdit }) {
 
   const handleShow = (row) => {
     const id = getId(row);
-    navigate(`/settings/form${id ? `?id=${id}` : ""}&readonly=1`);
+    navigate(`/settings/form?${id ? `id=${id}&` : ""}readonly=1`);
   };
 
   const handleEdit = (row) => {

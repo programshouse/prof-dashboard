@@ -40,7 +40,7 @@ export default function WorkshopList({ onEdit, onAdd }) {
     if (id) sp.set("id", id);
     // NOTE: do NOT set readonly => editable mode
     if (readonly) sp.set("readonly", "1"); // we won't pass readonly=true anymore
-    navigate(`/workshops/form${sp.toString() ? `?${sp.toString()}` : ""}`);
+    navigate(`/workshop/form${sp.toString() ? `?${sp.toString()}` : ""}`);
   };
 
   // Show should behave like Edit now

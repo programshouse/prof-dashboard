@@ -279,7 +279,7 @@ export default function ProfileForm({ onSuccess }) {
   const submit = async (e) => {
     e.preventDefault();
     if (isReadOnly) {
-      onSuccess ? onSuccess() : navigate("/profile/list");
+      onSuccess ? onSuccess() : navigate("/who-am-i");
       return;
     }
     if (disabledSubmit) return;
@@ -324,7 +324,7 @@ export default function ProfileForm({ onSuccess }) {
     try {
       setSaving(true);
       await destroy(form.id);
-      onSuccess ? onSuccess() : navigate("/profile/list");
+      onSuccess ? onSuccess() : navigate("/who-am-i");
     } finally {
       setSaving(false);
     }
@@ -362,7 +362,7 @@ export default function ProfileForm({ onSuccess }) {
               {saving ? "Deleting…" : "Delete"}
             </Button>
           )}
-          <Button variant="secondary" onClick={() => navigate("/profile/list")} className="mr-3">
+          <Button variant="secondary" onClick={() => navigate("/who-am-i")} className="mr-3">
             Back to List
           </Button>
         </PageHeader>
@@ -377,7 +377,7 @@ export default function ProfileForm({ onSuccess }) {
           <AdminForm
             title="Profile Information"
             onSubmit={submit}
-            onCancel={() => (onSuccess ? onSuccess() : navigate("/profile/list"))}
+            onCancel={() => (onSuccess ? onSuccess() : navigate("/who-am-i"))}
             submitText={isReadOnly ? "Close" : saving ? "Saving…" : "Save Profile"}
             submitDisabled={disabledSubmit}
           >

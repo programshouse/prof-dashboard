@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import BlogFormTiny from "./BlogForm";
 import BlogList from "./BlogList";
 
 export default function Blogs() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [editingBlog, setEditingBlog] = useState(null);
 
@@ -23,6 +24,8 @@ export default function Blogs() {
   const handleFormSuccess = () => {
     setShowForm(false);
     setEditingBlog(null);
+    // Leave the /form URL so Close / Cancel really close the form
+    navigate("/blogs");
   };
 
   if (isForm) {
