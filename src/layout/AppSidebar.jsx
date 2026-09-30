@@ -74,7 +74,7 @@ const AppSidebar = () => {
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-gray-200 bg-brand-600 px-5 text-gray-900 transition-all duration-300 ease-in-out dark:border-gray-800 dark:bg-gray-900 ${
+      className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-gray-200 bg-brand-600 px-5 text-gray-900 transition-all duration-300 ease-in-out ${
         isExpanded || isMobileOpen ? "w-[290px]" : isHovered ? "w-[290px]" : "w-[90px]"
       } ${isMobileOpen ? "translate-x-0" : isMobile ? "-translate-x-full" : "-translate-x-full"} lg:translate-x-0`}
       onMouseEnter={() => !isMobile && !isExpanded && setIsHovered(true)}
@@ -86,35 +86,19 @@ const AppSidebar = () => {
           {showLabels ? (
             <>
               <img
-                className="dark:hidden"
                 src="/images/logo/profLogo.png"
                 alt="logo"
                 width={100}
                 height={40}
               />
-              <img
-                className="hidden dark:block"
-                src="/images1/logo/logo2-dark.svg"
-                alt="logo"
-                width={100}
-                height={30}
-              />
             </>
           ) : (
             <>
               <img
-                className="dark:hidden"
                 src="/images/logo/profLogo.png"
                 alt="logo"
                 width={60}
                 height={24}
-              />
-              <img
-                className="hidden dark:block"
-                src="/images1/logo/logo2-dark.svg"
-                alt="logo"
-                width={60}
-                height={18}
               />
             </>
           )}

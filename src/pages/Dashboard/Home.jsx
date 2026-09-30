@@ -16,12 +16,12 @@ const StatCard = ({ icon: Icon, iconBg, iconColor, label, value }) => (
   <UniversalCard className="p-5">
     <div className="flex items-start justify-between gap-4">
       <div>
-        <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
+        <p className="text-sm text-gray-500 ">{label}</p>
         <div className="mt-2 flex items-baseline gap-2">
-          <h3 className="text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">
+          <h3 className="text-3xl font-semibold tracking-tight text-gray-900 ">
             {value}
           </h3>
-          <span className="text-xs text-gray-500 dark:text-gray-400">
+          <span className="text-xs text-gray-500 ">
             updated
           </span>
         </div>
@@ -43,8 +43,8 @@ const StatCard = ({ icon: Icon, iconBg, iconColor, label, value }) => (
 const Avatar = ({ name }) => {
   const initial = (name || "N")[0]?.toUpperCase();
   return (
-    <div className="h-9 w-9 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-      <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+    <div className="h-9 w-9 rounded-full bg-gray-100 flex items-center justify-center">
+      <span className="text-sm font-semibold text-gray-700 ">
         {initial}
       </span>
     </div>
@@ -78,22 +78,22 @@ export default function Home() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatCard
           icon={FileText}
-          iconBg="bg-blue-50 dark:bg-blue-500/10"
-          iconColor="text-blue-600 dark:text-blue-400"
+          iconBg="bg-blue-50 "
+          iconColor="text-blue-600 "
           label="Total Blogs"
           value={Blogs?.length ?? 0}
         />
         <StatCard
           icon={Briefcase}
-          iconBg="bg-emerald-50 dark:bg-emerald-500/10"
-          iconColor="text-emerald-600 dark:text-emerald-400"
+          iconBg="bg-emerald-50 "
+          iconColor="text-emerald-600 "
           label="Total Services"
           value={services?.length ?? 0}
         />
         <StatCard
           icon={Users}
-          iconBg="bg-violet-50 dark:bg-violet-500/10"
-          iconColor="text-violet-600 dark:text-violet-400"
+          iconBg="bg-violet-50 "
+          iconColor="text-violet-600 "
           label="Total Subscribers"
           value={subscribers?.length ?? 0}
         />
@@ -102,17 +102,17 @@ export default function Home() {
       {/* Latest Subscribers */}
       <UniversalCard className="p-0">
         {/* Card Header */}
-        <div className="px-6 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-gray-100 dark:border-gray-700/60">
+        <div className="px-6 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-gray-100 ">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h2 className="text-lg font-semibold text-gray-900 ">
               Latest Subscribers
             </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-gray-500 ">
               Most recent contacts added to your list
             </p>
           </div>
 
-          <div className="inline-flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+          <div className="inline-flex items-center gap-2 text-xs text-gray-500 ">
             <BadgeCheck className="w-4 h-4" />
             Synced
           </div>
@@ -121,8 +121,8 @@ export default function Home() {
         {/* Table */}
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 dark:bg-gray-800/60">
-              <tr className="text-left text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            <thead className="bg-gray-50 ">
+              <tr className="text-left text-xs uppercase tracking-wider text-gray-500 ">
 
                 <th className="px-6 py-3">Email</th>
      
@@ -130,7 +130,7 @@ export default function Home() {
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-700/60">
+            <tbody className="divide-y divide-gray-100 ">
               {latestSubscribers.length > 0 ? (
                 latestSubscribers.map((subscriber, index) => {
            
@@ -142,12 +142,12 @@ export default function Home() {
                   return (
                     <tr
                       key={subscriber?.id || index}
-                      className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors"
+                      className="bg-white hover:bg-gray-50 transition-colors"
                     >
 
 
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-2 text-gray-700 dark:text-gray-200">
+                        <div className="flex items-center gap-2 text-gray-700 ">
                           <Mail className="w-4 h-4 text-gray-400" />
                           <span className="truncate max-w-[260px]">
                             {email}
@@ -162,8 +162,8 @@ export default function Home() {
                           className={[
                             "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium",
                             isActive
-                              ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"
-                              : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200",
+                              ? "bg-emerald-50 text-emerald-700 "
+                              : "bg-gray-100 text-gray-700 ",
                           ].join(" ")}
                         >
                           {status}
@@ -173,16 +173,16 @@ export default function Home() {
                   );
                 })
               ) : (
-                <tr className="bg-white dark:bg-gray-800">
+                <tr className="bg-white ">
                   <td colSpan="4" className="px-6 py-10 text-center">
                     <div className="mx-auto max-w-sm">
-                      <div className="h-12 w-12 mx-auto rounded-2xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                        <Users className="w-6 h-6 text-gray-500 dark:text-gray-300" />
+                      <div className="h-12 w-12 mx-auto rounded-2xl bg-gray-100 flex items-center justify-center">
+                        <Users className="w-6 h-6 text-gray-500 " />
                       </div>
-                      <h3 className="mt-4 font-semibold text-gray-900 dark:text-white">
+                      <h3 className="mt-4 font-semibold text-gray-900 ">
                         No subscribers yet
                       </h3>
-                      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                      <p className="mt-1 text-sm text-gray-500 ">
                         Once people subscribe, you’ll see them listed here.
                       </p>
                     </div>
@@ -194,7 +194,7 @@ export default function Home() {
         </div>
 
         {/* Card Footer */}
-        <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-700/60 text-xs text-gray-500 dark:text-gray-400">
+        <div className="px-6 py-4 border-t border-gray-100 text-xs text-gray-500 ">
           Showing {Math.min(latestSubscribers.length, 3)} of{" "}
           {subscribers?.length ?? 0} subscribers
         </div>

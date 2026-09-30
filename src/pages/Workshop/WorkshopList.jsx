@@ -101,7 +101,7 @@ export default function WorkshopList({ onEdit, onAdd }) {
               >
                 {title}
               </button>
-              <div className="text-[11px] text-gray-500 dark:text-gray-400">
+              <div className="text-[11px] text-gray-500 ">
                 ID: <span className="font-mono">{id || "—"}</span>
               </div>
             </div>
@@ -166,7 +166,7 @@ export default function WorkshopList({ onEdit, onAdd }) {
                   <img
                     src={img}
                     alt={row?.title || "image"}
-                    className="h-10 w-10 rounded object-cover border border-gray-200 dark:border-gray-700"
+                    className="h-10 w-10 rounded object-cover border border-gray-200 "
                   />
                 </a>
               ) : (
@@ -177,7 +177,7 @@ export default function WorkshopList({ onEdit, onAdd }) {
                   href={vid}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                  className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 "
                   title={vid}
                 >
                   Video
@@ -198,9 +198,9 @@ export default function WorkshopList({ onEdit, onAdd }) {
       <PageLayout title="Workshop Management | ProfMSE">
         <PageHeader title="Workshop Management" description="Manage workshops that appear on the website" />
         <div className="col-span-12">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 text-center">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500 mx-auto" />
-            <p className="mt-2 text-gray-600 dark:text-gray-300">Loading workshops...</p>
+            <p className="mt-2 text-gray-600 ">Loading workshops...</p>
           </div>
         </div>
       </PageLayout>

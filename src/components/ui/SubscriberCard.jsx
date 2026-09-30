@@ -12,16 +12,16 @@ export default function SubscriberCard({
 }) {
   return (
     <div className={`${widthClass}`}>
-      <div className={`h-full flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all hover:shadow-lg hover:-translate-y-0.5 ${className}`}>
+      <div className={`h-full flex flex-col bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden transition-all hover:shadow-lg hover:-translate-y-0.5 ${className}`}>
         <div className="p-5 flex-1 flex flex-col">
           <div className="flex items-start justify-between gap-3">
-            <h3 className="text-base font-semibold text-gray-900 dark:text-white break-words">{email}</h3>
+            <h3 className="text-base font-semibold text-gray-900 break-words">{email}</h3>
             {createdAt ? (
               <span className="shrink-0 text-xs text-gray-500">{new Date(createdAt).toLocaleDateString()}</span>
             ) : null}
           </div>
           {name ? (
-            <p className="mt-1 text-sm text-gray-600 dark:text-gray-300 line-clamp-2">{name}</p>
+            <p className="mt-1 text-sm text-gray-600 line-clamp-2">{name}</p>
           ) : null}
 
           <div className="mt-4 grid grid-cols-3 gap-2">
@@ -43,7 +43,7 @@ export default function SubscriberCard({
                 type="button"
                 onClick={secondaryAction.onClick}
                 disabled={secondaryAction.disabled}
-                className="col-span-1 inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-medium text-brand-700 bg-brand-50 hover:bg-brand-100 dark:bg-gray-700 dark:text-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-300"
+                className="col-span-1 inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-medium text-brand-700 bg-brand-50 hover:bg-brand-100 focus:outline-none focus:ring-2 focus:ring-brand-300"
               >
                 {secondaryAction.label ?? "Edit"}
               </button>

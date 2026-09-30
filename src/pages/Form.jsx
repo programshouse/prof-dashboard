@@ -128,12 +128,12 @@ export default function SiteInfoForm({
   };
 
   const inputCls =
-    "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white";
+    "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent ";
 
   const SocialRow = ({ icon: Icon, placeholder, value, onChange }) => (
     <div className="flex items-center gap-3">
-      <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-        <Icon className="text-gray-600 dark:text-gray-300" />
+      <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white ">
+        <Icon className="text-gray-600 " />
       </span>
       <input
         type="url"
@@ -169,7 +169,7 @@ export default function SiteInfoForm({
       {/* Basic Info */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             Site Name *
           </label>
           <input
@@ -185,7 +185,7 @@ export default function SiteInfoForm({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             Email *
           </label>
           <input
@@ -199,7 +199,7 @@ export default function SiteInfoForm({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             Phone *
           </label>
           <input
@@ -213,7 +213,7 @@ export default function SiteInfoForm({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             Address *
           </label>
           <input
@@ -229,7 +229,7 @@ export default function SiteInfoForm({
 
       {/* Socials */}
       <div className="mt-6">
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+        <h3 className="text-sm font-semibold text-gray-900 mb-3">
           Social Links
         </h3>
         <div className="space-y-4">

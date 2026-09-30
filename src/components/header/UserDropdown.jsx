@@ -19,7 +19,7 @@ export default function UserDropdown() {
       {/* Main dropdown toggle */}
       <button
         onClick={toggleDropdown}
-        className="flex items-center text-gray-700 dropdown-toggle dark:text-gray-400"
+        className="flex items-center text-gray-700 dropdown-toggle "
       >
         {/* <span className="mr-3 overflow-hidden rounded-full h-11 w-11 bg-gray-100">
           <img
@@ -32,7 +32,7 @@ export default function UserDropdown() {
         <span className="block mr-1 font-medium text-theme-sm">{name}</span>
 
         <svg
-          className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${
+          className={`stroke-gray-500 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
           }`}
           width="18"
@@ -55,13 +55,13 @@ export default function UserDropdown() {
       <Dropdown
         isOpen={isOpen}
         onClose={closeDropdown}
-        className="absolute right-0 mt-[17px] flex w-[260px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark"
+        className="absolute right-0 mt-[17px] flex w-[260px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg "
       >
         <div>
-          <span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
+          <span className="block font-medium text-gray-700 text-theme-sm ">
             {name}
           </span>
-          <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
+          <span className="mt-0.5 block text-theme-xs text-gray-500 ">
             {email}
           </span>
         </div>
@@ -72,7 +72,7 @@ export default function UserDropdown() {
             logout();
             closeDropdown();
           }}
-          className="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300 w-full text-left"
+          className="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 w-full text-left"
         >
           Sign out
         </button>

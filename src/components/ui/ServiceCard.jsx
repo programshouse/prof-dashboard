@@ -15,10 +15,10 @@ export default function ServiceCard({
   return (
     <div className={`${widthClass}`}>
       <div
-        className={`h-full flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden transition-all hover:shadow-lg hover:-translate-y-0.5 ${className}`}
+        className={`h-full flex flex-col bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden transition-all hover:shadow-lg hover:-translate-y-0.5 ${className}`}
       >
       {/* Media */}
-      <div className="relative w-full aspect-[16/9] bg-gray-100 dark:bg-gray-700">
+      <div className="relative w-full aspect-[16/9] bg-gray-100 ">
         {image ? (
           <img src={image} alt={title || "Service image"} className="absolute inset-0 w-full h-full object-cover" />
         ) : (
@@ -31,11 +31,11 @@ export default function ServiceCard({
 
       {/* Content */}
       <div className="p-5 flex-1 flex flex-col">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-1">
+        <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">
           {title}
         </h3>
 
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-300 leading-relaxed line-clamp-3">
+        <p className="mt-2 text-sm text-gray-600 leading-relaxed line-clamp-3">
           {description}
         </p>
 
@@ -67,7 +67,7 @@ export default function ServiceCard({
               type="button"
               onClick={secondaryAction.onClick}
               disabled={secondaryAction.disabled}
-              className="col-span-1 inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-medium text-brand-700 bg-brand-50 hover:bg-brand-100 dark:bg-gray-700 dark:text-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-300"
+              className="col-span-1 inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-medium text-brand-700 bg-brand-50 hover:bg-brand-100 focus:outline-none focus:ring-2 focus:ring-brand-300"
             >
               {secondaryAction.label ?? "Edit"}
             </button>

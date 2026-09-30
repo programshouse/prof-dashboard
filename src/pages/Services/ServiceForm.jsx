@@ -214,9 +214,9 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
 
   const disabled = isReadOnly;
   const inputCls =
-    "w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white";
+    "w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent ";
   const disabledCls = disabled
-    ? "bg-gray-100 dark:bg-gray-800 cursor-not-allowed border-gray-200 dark:border-gray-700"
+    ? "bg-gray-100 cursor-not-allowed border-gray-200 "
     : "border-gray-300";
 
   return (
@@ -225,9 +225,9 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
         <PageHeader title={`${isReadOnly ? "View" : serviceId ? "Edit" : "Add"} Service`} />
 
         {loading ? (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 text-center">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500 mx-auto" />
-            <p className="mt-2 text-gray-600 dark:text-gray-300">Loading service...</p>
+            <p className="mt-2 text-gray-600 ">Loading service...</p>
           </div>
         ) : (
           <AdminForm
@@ -240,14 +240,14 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
             submitDisabled={isReadOnly ? false : saving || !!linkErr || !!videoLinkErr || !!imgErr}
           >
             {!!serverErr && (
-              <div className="mb-4 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-700/40 dark:bg-red-900/20 dark:text-red-300">
+              <div className="mb-4 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700 ">
                 {serverErr}
               </div>
             )}
 
             {/* Title */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Service Title *
               </label>
               <input
@@ -264,7 +264,7 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
 
             {/* Description */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Description *
               </label>
               <textarea
@@ -280,7 +280,7 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
 
             {/* Features */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Features</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Features</label>
               <div className="space-y-2">
                 {form.features.map((feature, index) => (
                   <div key={index} className="flex gap-2">
@@ -296,7 +296,7 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
                       <button
                         type="button"
                         onClick={() => removeFeature(index)}
-                        className="px-3 py-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                        className="px-3 py-2 text-red-600 hover:text-red-800 "
                       >
                         Remove
                       </button>
@@ -317,7 +317,7 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
 
             {/* Link (optional) */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Link (optional)
               </label>
               <input
@@ -328,7 +328,7 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
                 placeholder="https://example.com/service"
                 className={`${inputCls} ${
                   disabled
-                    ? "border-gray-200 dark:border-gray-700"
+                    ? "border-gray-200 "
                     : linkErr
                     ? "border-red-500 focus:ring-red-400"
                     : "border-gray-300 focus:ring-brand-500"
@@ -342,7 +342,7 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
 
             {/* Video Link (optional) */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Video Link (optional)
               </label>
               <input
@@ -353,7 +353,7 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
                 placeholder="https://example.com/video"
                 className={`${inputCls} ${
                   disabled
-                    ? "border-gray-200 dark:border-gray-700"
+                    ? "border-gray-200 "
                     : videoLinkErr
                     ? "border-red-500 focus:ring-red-400"
                     : "border-gray-300 focus:ring-brand-500"
@@ -367,7 +367,7 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
 
             {/* Alt Text */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Alt Text (for image accessibility)
               </label>
               <input
@@ -376,7 +376,7 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
                 value={form.alt}
                 onChange={onText}
                 placeholder="Describe the image for screen readers"
-                className={`${inputCls} ${disabled ? "border-gray-200 dark:border-gray-700" : "border-gray-300 focus:ring-brand-500"}`}
+                className={`${inputCls} ${disabled ? "border-gray-200 " : "border-gray-300 focus:ring-brand-500"}`}
                 disabled={disabled}
                 maxLength={255}
               />
@@ -385,14 +385,14 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
 
             {/* Image File */}
             <div className={isReadOnly ? "pointer-events-none" : ""}>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Image (PNG/JPG/JPEG/WEBP/SVG/GIF)
               </label>
               <input
                 type="file"
                 accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif"
                 onChange={onPickImg}
-                className="block w-full text-sm text-gray-700 dark:text-gray-300 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:bg-brand-600 file:text-white hover:file:bg-brand-700"
+                className="block w-full text-sm text-gray-700 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:bg-brand-600 file:text-white hover:file:bg-brand-700"
                 disabled={isReadOnly}
               />
               {imgErr && <p className="mt-1 text-xs text-red-600">{imgErr}</p>}
@@ -402,7 +402,7 @@ export default function ServiceForm({ serviceId: propServiceId, onSuccess }) {
                   <img
                     src={imgPreview}
                     alt="Preview"
-                    className="h-16 w-16 rounded object-cover border border-gray-200 dark:border-gray-700"
+                    className="h-16 w-16 rounded object-cover border border-gray-200 "
                     onError={(e) => {
                       e.currentTarget.style.visibility = "hidden";
                     }}

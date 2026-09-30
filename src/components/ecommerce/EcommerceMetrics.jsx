@@ -5,18 +5,18 @@ import { BoxIconLine, GroupIcon } from "../../icons";
 
 function MetricCard({ icon, title, value, loading }) {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
-      <div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-xl dark:bg-gray-800">
+    <div className="rounded-2xl border border-gray-200 bg-white p-5 md:p-6">
+      <div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-xl ">
         {icon}
       </div>
 
       <div className="flex items-end justify-between mt-5">
         <div>
-          <span className="text-sm text-gray-500 dark:text-gray-400">{title}</span>
+          <span className="text-sm text-gray-500 ">{title}</span>
           {loading ? (
             <div className="mt-2 h-6 w-16 rounded bg-gray-200 animate-pulse" />
           ) : (
-            <h4 className="mt-2 font-bold text-gray-800 text-title-sm dark:text-white/90">
+            <h4 className="mt-2 font-bold text-gray-800 text-title-sm ">
               {value}
             </h4>
           )}
@@ -72,25 +72,25 @@ export default function EcommerceMetrics() {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-4 md:gap-6">
       <MetricCard
-        icon={<BoxIconLine className="text-gray-800 size-6 dark:text-white/90" />}
+        icon={<BoxIconLine className="text-gray-800 size-6 " />}
         title="Workshops"
         value={nf(workshops)}
         loading={loading && workshops === 0}
       />
       <MetricCard
-        icon={<BoxIconLine className="text-gray-800 size-6 dark:text-white/90" />}
+        icon={<BoxIconLine className="text-gray-800 size-6 " />}
         title="Books"
         value={nf(books)}
         loading={loading && books === 0}
       />
       <MetricCard
-        icon={<BoxIconLine className="text-gray-800 size-6 dark:text-white/90" />}
+        icon={<BoxIconLine className="text-gray-800 size-6 " />}
         title="Sessions"
         value={nf(sessions)}
         loading={loading && sessions === 0}
       />
       <MetricCard
-        icon={<GroupIcon className="text-gray-800 size-6 dark:text-white/90" />}
+        icon={<GroupIcon className="text-gray-800 size-6 " />}
         title="Users"
         value={nf(users)}
         loading={loading && users === 0}

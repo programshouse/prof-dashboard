@@ -335,9 +335,9 @@ export default function ProfileForm({ onSuccess }) {
       <PageLayout title="Profile Management | ProfMSE">
         <div className="col-span-12">
           <PageHeader title="Profile Management" description="Edit your professional profile information" />
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 text-center">
+          <div className="bg-white rounded-lg border border-gray-200 p-6 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500 mx-auto" />
-            <p className="mt-2 text-gray-600 dark:text-gray-300">Loading…</p>
+            <p className="mt-2 text-gray-600 ">Loading…</p>
           </div>
         </div>
       </PageLayout>
@@ -345,9 +345,9 @@ export default function ProfileForm({ onSuccess }) {
   }
 
   const inputCls =
-    "w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white";
+    "w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent ";
   const disabledCls = isReadOnly
-    ? "bg-gray-100 dark:bg-gray-800 cursor-not-allowed border-gray-200 dark:border-gray-700"
+    ? "bg-gray-100 cursor-not-allowed border-gray-200 "
     : "border-gray-300";
 
   return (
@@ -369,7 +369,7 @@ export default function ProfileForm({ onSuccess }) {
 
         <div className="col-span-12 space-y-4">
           {err && (
-            <div className="text-sm px-4 py-3 rounded bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800">
+            <div className="text-sm px-4 py-3 rounded bg-red-50 text-red-700 border border-red-200 ">
               {err}
             </div>
           )}
@@ -384,7 +384,7 @@ export default function ProfileForm({ onSuccess }) {
             {/* Title row */}
             <div className="grid grid-cols-1 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Full Name *
                 </label>
                 <input
@@ -402,7 +402,7 @@ export default function ProfileForm({ onSuccess }) {
 
               {/* Description row */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Professional Description *
                 </label>
                 <textarea
@@ -420,7 +420,7 @@ export default function ProfileForm({ onSuccess }) {
 
               {/* Video Link row */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Video Link
                 </label>
                 <input
@@ -436,7 +436,7 @@ export default function ProfileForm({ onSuccess }) {
 
             {/* Features */}
             <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="block text-sm font-medium text-gray-700 ">
                 Professional Features
               </label>
 
@@ -444,16 +444,16 @@ export default function ProfileForm({ onSuccess }) {
                 {(form.features || []).map((feature, i) => (
                   <div
                     key={i}
-                    className="rounded-lg border border-gray-200 dark:border-gray-700 p-2 bg-gray-50 dark:bg-gray-900/40"
+                    className="rounded-lg border border-gray-200 p-2 bg-gray-50 "
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs text-gray-600 dark:text-gray-400">Feature #{i + 1}</span>
+                      <span className="text-xs text-gray-600 ">Feature #{i + 1}</span>
                       {!isReadOnly && (
                         <div className="flex items-center gap-2">
                           <button
                             type="button"
                             onClick={() => moveFeature(i, -1)}
-                            className="px-2 py-1 text-xs rounded-md bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white"
+                            className="px-2 py-1 text-xs rounded-md bg-gray-200 text-gray-900 "
                             title="Move up"
                           >
                             ↑
@@ -461,7 +461,7 @@ export default function ProfileForm({ onSuccess }) {
                           <button
                             type="button"
                             onClick={() => moveFeature(i, +1)}
-                            className="px-2 py-1 text-xs rounded-md bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white"
+                            className="px-2 py-1 text-xs rounded-md bg-gray-200 text-gray-900 "
                             title="Move down"
                           >
                             ↓
@@ -482,10 +482,10 @@ export default function ProfileForm({ onSuccess }) {
                       onChange={(e) => updateFeature(i, e.target.value)}
                       rows={2}
                       placeholder="Write a detailed feature, responsibility, or achievement..."
-                      className={`w-full px-3 py-2 rounded-lg border bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 ${
+                      className={`w-full px-3 py-2 rounded-lg border bg-white text-gray-900 focus:ring-2 focus:ring-brand-500 ${
                         isReadOnly
-                          ? "border-gray-200 dark:border-gray-700 cursor-not-allowed"
-                          : "border-gray-300 dark:border-gray-600"
+                          ? "border-gray-200 cursor-not-allowed"
+                          : "border-gray-300 "
                       }`}
                       disabled={isReadOnly}
                     />
@@ -500,7 +500,7 @@ export default function ProfileForm({ onSuccess }) {
                       id="new-feature"
                       rows={3}
                       placeholder="Add a new feature..."
-                      className="w-full px-3 py-2 pr-24 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 resize-none"
+                      className="w-full px-3 py-2 pr-24 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-brand-500 resize-none"
                       value={form.newFeatureDraft || ""}
                       onChange={(e) => setForm((p) => ({ ...p, newFeatureDraft: e.target.value }))}
                     />
@@ -527,14 +527,14 @@ export default function ProfileForm({ onSuccess }) {
             <div className="grid grid-cols-1 gap-6 mt-6">
               {/* Image */}
               <div className={isReadOnly ? "  pointer-events-none" : ""}>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Image (PNG/JPG/WEBP/SVG/GIF)
                 </label>
                 <input
                   type="file"
                   accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif"
                   onChange={onPickImage}
-                  className="block w-full text-sm text-gray-700 dark:text-gray-300 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:bg-brand-600 file:text-white hover:file:bg-brand-700"
+                  className="block w-full text-sm text-gray-700 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:bg-brand-600 file:text-white hover:file:bg-brand-700"
                   disabled={isReadOnly}
                 />
                 {imgErr && <p className="mt-1 text-xs text-red-600">{imgErr}</p>}
@@ -544,7 +544,7 @@ export default function ProfileForm({ onSuccess }) {
                     <img
                       src={imgPreview}
                       alt="Profile"
-                      className="h-32 w-32 rounded object-cover border border-gray-200 dark:border-gray-700"
+                      className="h-32 w-32 rounded object-cover border border-gray-200 "
                     />
                     {!isReadOnly && (
                       <button type="button" onClick={requestRemoveImage} className="mt-2 block text-xs text-red-600 hover:underline">
@@ -559,14 +559,14 @@ export default function ProfileForm({ onSuccess }) {
 
               {/* Video */}
               <div className={isReadOnly ? "  pointer-events-none" : ""}>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Video (any video/*)
                 </label>
                 <input
                   type="file"
                   accept="video/*"
                   onChange={onPickVideo}
-                  className="block w-full text-sm text-gray-700 dark:text-gray-300 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:bg-brand-600 file:text-white hover:file:bg-brand-700"
+                  className="block w-full text-sm text-gray-700 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:bg-brand-600 file:text-white hover:file:bg-brand-700"
                   disabled={isReadOnly}
                 />
                 {videoErr && <p className="mt-1 text-xs text-red-600">{videoErr}</p>}
@@ -576,7 +576,7 @@ export default function ProfileForm({ onSuccess }) {
                     <video
                       src={vidPreview}
                       controls
-                      className="w-full max-h-48 rounded border border-gray-200 dark:border-gray-700"
+                      className="w-full max-h-48 rounded border border-gray-200 "
                     />
                     {!isReadOnly && (
                       <button type="button" onClick={requestRemoveVideo} className="mt-2 block text-xs text-red-600 hover:underline">

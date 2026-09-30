@@ -13,22 +13,22 @@ const Alert = ({
   const variantClasses = {
     success: {
       container:
-        "border-success-500 bg-success-50 dark:border-success-500/30 dark:bg-success-500/15",
+        "border-success-500 bg-success-50 ",
       icon: "text-success-500",
     },
     error: {
       container:
-        "border-error-500 bg-error-50 dark:border-error-500/30 dark:bg-error-500/15",
+        "border-error-500 bg-error-50 ",
       icon: "text-error-500",
     },
     warning: {
       container:
-        "border-warning-500 bg-warning-50 dark:border-warning-500/30 dark:bg-warning-500/15",
+        "border-warning-500 bg-warning-50 ",
       icon: "text-warning-500",
     },
     info: {
       container:
-        "border-purble-light-500 bg-purble-light-50 dark:border-purble-light-500/30 dark:bg-purble-light-500/15",
+        "border-purble-light-500 bg-purble-light-50 ",
       icon: "text-purble-light-500",
     },
   };
@@ -113,16 +113,16 @@ const Alert = ({
         </div>
 
         <div>
-          <h4 className="mb-1 text-sm font-semibold text-gray-800 dark:text-white/90">
+          <h4 className="mb-1 text-sm font-semibold text-gray-800 ">
             {title}
           </h4>
 
-          <p className="text-sm text-gray-500 dark:text-gray-400">{message}</p>
+          <p className="text-sm text-gray-500 ">{message}</p>
 
           {showLink && (
             <Link
               to={linkHref}
-              className="inline-block mt-3 text-sm font-medium text-gray-500 underline dark:text-gray-400"
+              className="inline-block mt-3 text-sm font-medium text-gray-500 underline "
             >
               {linkText}
             </Link>

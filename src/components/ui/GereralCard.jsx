@@ -47,14 +47,14 @@ export default function GeneralCard({
   // Variant styles
   const variantBase =
     variant === "outline"
-      ? "border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-800"
+      ? "border border-gray-200 bg-white "
       : variant === "soft"
-      ? "border border-transparent bg-gray-50/80 dark:bg-gray-800/60"
+      ? "border border-transparent bg-gray-50/80 "
       : // elevated (default)
-        "border border-gray-100/80 dark:border-gray-800/70 bg-white dark:bg-gray-800 shadow-sm";
+        "border border-gray-100/80 bg-white shadow-sm";
 
   const hoverRing =
-    "hover:shadow-md hover:shadow-gray-200/50 dark:hover:shadow-black/30 hover:border-gray-200/90";
+    "hover:shadow-md hover:shadow-gray-200/50 hover:border-gray-200/90";
 
   const paddingX = orientation === "horizontal" ? "p-4" : compact ? "p-4" : "p-5";
 
@@ -100,17 +100,17 @@ export default function GeneralCard({
           <div
             className={`${
               orientation === "horizontal" ? "h-28 w-full" : "aspect-[16/9] w-full"
-            } bg-gray-200/70 dark:bg-gray-700 rounded-t-2xl`}
+            } bg-gray-200/70 rounded-t-2xl`}
           />
           {/* Body skeleton */}
           <div className={`${paddingX} space-y-3`}>
-            <div className="h-4 w-1/3 rounded bg-gray-200/80 dark:bg-gray-700" />
-            <div className="h-3 w-2/3 rounded bg-gray-200/70 dark:bg-gray-700" />
-            <div className="h-3 w-full rounded bg-gray-200/60 dark:bg-gray-700" />
-            <div className="h-3 w-5/6 rounded bg-gray-200/60 dark:bg-gray-700" />
+            <div className="h-4 w-1/3 rounded bg-gray-200/80 " />
+            <div className="h-3 w-2/3 rounded bg-gray-200/70 " />
+            <div className="h-3 w-full rounded bg-gray-200/60 " />
+            <div className="h-3 w-5/6 rounded bg-gray-200/60 " />
             <div className="mt-2 flex gap-2">
-              <div className="h-8 w-20 rounded-lg bg-gray-200/70 dark:bg-gray-700" />
-              <div className="h-8 w-20 rounded-lg bg-gray-200/70 dark:bg-gray-700" />
+              <div className="h-8 w-20 rounded-lg bg-gray-200/70 " />
+              <div className="h-8 w-20 rounded-lg bg-gray-200/70 " />
             </div>
           </div>
         </div>
@@ -122,14 +122,14 @@ export default function GeneralCard({
   const TitleEl = title ? (
     href ? (
       <span
-        className="line-clamp-1 text-[15px] font-semibold text-gray-900 decoration-brand-600/40 hover:underline dark:text-gray-100"
+        className="line-clamp-1 text-[15px] font-semibold text-gray-900 decoration-brand-600/40 hover:underline "
         title={typeof title === "string" ? title : undefined}
       >
         {title}
       </span>
     ) : (
       <div
-        className="line-clamp-1 text-[15px] font-semibold text-gray-900 dark:text-gray-100"
+        className="line-clamp-1 text-[15px] font-semibold text-gray-900 "
         title={typeof title === "string" ? title : undefined}
       >
         {title}
@@ -172,7 +172,7 @@ export default function GeneralCard({
                 <div className="absolute inset-0 bg-gradient-to-t from-black/15 via-black/0 to-transparent opacity-80" />
               </>
             ) : (
-              <div className="flex h-full w-full items-center justify-center bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-300">
+              <div className="flex h-full w-full items-center justify-center bg-gray-100 text-gray-500 ">
                 <div className="text-lg font-semibold tracking-wide">{initials || "—"}</div>
               </div>
             )}
@@ -191,7 +191,7 @@ export default function GeneralCard({
               <div className="min-w-0">
                 {TitleEl}
                 {subtitle && (
-                  <div className="mt-0.5 line-clamp-1 text-xs text-gray-500 dark:text-gray-400">
+                  <div className="mt-0.5 line-clamp-1 text-xs text-gray-500 ">
                     {subtitle}
                   </div>
                 )}
@@ -205,7 +205,7 @@ export default function GeneralCard({
                 {tags.map((t, i) => (
                   <span
                     key={i}
-                    className="rounded-full border border-gray-200 bg-white/70 px-2 py-0.5 text-xs text-gray-600 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800/70 dark:text-gray-300"
+                    className="rounded-full border border-gray-200 bg-white/70 px-2 py-0.5 text-xs text-gray-600 backdrop-blur-sm "
                   >
                     {t}
                   </span>
@@ -216,7 +216,7 @@ export default function GeneralCard({
             {/* Description */}
             {description && (
               <p
-                className={`mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300 ${compact ? "mt-1" : ""}`}
+                className={`mt-2 text-sm leading-6 text-gray-600 ${compact ? "mt-1" : ""}`}
                 style={
                   clamp
                     ? {
@@ -246,9 +246,9 @@ export default function GeneralCard({
                     primary:
                       "bg-brand-600 text-white hover:bg-brand-700 focus:ring-2 focus:ring-brand-500",
                     danger:
-                      "border border-error-300 text-error-700 hover:bg-error-50 dark:border-error-700 dark:text-error-300 dark:hover:bg-error-900/30",
+                      "border border-error-300 text-error-700 hover:bg-error-50 ",
                     ghost:
-                      "border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700",
+                      "border border-gray-300 text-gray-700 hover:bg-gray-50 ",
                   };
                   return (
                     <button
@@ -269,7 +269,7 @@ export default function GeneralCard({
 
         {/* Footer slot */}
         {footer && (
-          <div className="mt-4 border-t border-gray-100 bg-gray-50/60 p-3 text-sm dark:border-gray-700 dark:bg-gray-900/40">
+          <div className="mt-4 border-t border-gray-100 bg-gray-50/60 p-3 text-sm ">
             {footer}
           </div>
         )}

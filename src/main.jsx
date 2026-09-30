@@ -5,17 +5,14 @@ import "swiper/swiper-bundle.css";
 import "flatpickr/dist/flatpickr.css";
 import App from "./App";
 import { AppWrapper } from "./components/common/PageMeta";
-import { ThemeProvider } from "./context/ThemeContext";
 
 const rootElement = document.getElementById("root");
 if (rootElement) {
   createRoot(rootElement).render(
     <StrictMode>
-      <ThemeProvider>
-        <AppWrapper>
-          <App />
-        </AppWrapper>
-      </ThemeProvider>
+      <AppWrapper>
+        <App />
+      </AppWrapper>
     </StrictMode>,
   );
 }

@@ -12,15 +12,15 @@ const AdminForm = ({
   submitDisabled = false,
 }) => {
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 ${className}`}>
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+    <div className={`bg-white rounded-lg shadow-sm border border-gray-200 p-6 ${className}`}>
+      <h2 className="text-xl font-semibold text-gray-900 mb-6">
         {title}
       </h2>
       
       <form onSubmit={onSubmit} className="space-y-6">
         {children}
         
-        <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-gray-200 ">
           <button
             type="submit"
             disabled={submitDisabled}

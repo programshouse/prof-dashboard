@@ -67,8 +67,8 @@ export default function SettingsList({ onEdit }) {
           const address  = row.address || "—";
           return (
             <div className="min-w-0 max-w-[380px]">
-              <div className="font-medium text-gray-900 dark:text-gray-100 truncate">{siteName}</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{address}</div>
+              <div className="font-medium text-gray-900 truncate">{siteName}</div>
+              <div className="text-xs text-gray-500 truncate">{address}</div>
             </div>
           );
         },
@@ -79,7 +79,7 @@ export default function SettingsList({ onEdit }) {
         render: (row) => (
           <a
             href={row.email ? `mailto:${row.email}` : undefined}
-            className="text-brand-700 dark:text-brand-300 hover:underline block max-w-[260px] truncate"
+            className="text-brand-700 hover:underline block max-w-[260px] truncate"
             title={row.email || ""}
           >
             {row.email || "—"}
@@ -129,7 +129,7 @@ export default function SettingsList({ onEdit }) {
 
         <main className="w-full pb-24">
           {loading && (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 text-center">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
               Loading settings…
             </div>
           )}
@@ -145,7 +145,7 @@ export default function SettingsList({ onEdit }) {
           )}
 
           {!loading && !error && data.length > 0 && (
-            <div className="overflow-x-auto rounded-xl border border-brand-200 bg-white dark:bg-gray-800 shadow">
+            <div className="overflow-x-auto rounded-xl border border-brand-200 bg-white shadow">
               <AdminTable
                 title="Current Settings"
                 data={data}

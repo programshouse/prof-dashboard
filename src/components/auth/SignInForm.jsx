@@ -38,10 +38,10 @@ export default function SignInForm() {
       <div className="mx-auto flex w-full max-w-md flex-1 items-center justify-center">
         <div className="w-full">
           <div className="mb-6 sm:mb-8">
-            <h1 className="text-title-sm sm:text-title-md mb-2 font-semibold text-gray-800 dark:text-white/90">
+            <h1 className="text-title-sm sm:text-title-md mb-2 font-semibold text-gray-800 ">
               Sign In
             </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-gray-500 ">
               Enter your email and password to sign in!
             </p>
           </div>
@@ -77,7 +77,7 @@ export default function SignInForm() {
             }) => (
               <form onSubmit={handleSubmit} noValidate>
                 {(status || error) && (
-                  <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
+                  <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 ">
                     {status || error}
                   </div>
                 )}
@@ -101,7 +101,7 @@ export default function SignInForm() {
                       className={`${touched.email && errors.email ? "ring-1 ring-red-400 focus:ring-red-500" : ""}`}
                     />
                     {touched.email && errors.email && (
-                      <p id="email-error" className="mt-1 text-xs text-red-600 dark:text-red-400">
+                      <p id="email-error" className="mt-1 text-xs text-red-600 ">
                         {errors.email}
                       </p>
                     )}
@@ -128,18 +128,18 @@ export default function SignInForm() {
                       <button
                         type="button"
                         onClick={() => setShowPassword((s) => !s)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1 transition hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:hover:bg-white/10"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1 transition hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-brand-500 "
                         aria-label={showPassword ? "Hide password" : "Show password"}
                       >
                         {showPassword ? (
-                          <EyeIcon className="size-5 fill-gray-500 dark:fill-gray-400" />
+                          <EyeIcon className="size-5 fill-gray-500 " />
                         ) : (
-                          <EyeCloseIcon className="size-5 fill-gray-500 dark:fill-gray-400" />
+                          <EyeCloseIcon className="size-5 fill-gray-500 " />
                         )}
                       </button>
                     </div>
                     {touched.password && errors.password && (
-                      <p id="password-error" className="mt-1 text-xs text-red-600 dark:text-red-400">
+                      <p id="password-error" className="mt-1 text-xs text-red-600 ">
                         {errors.password}
                       </p>
                     )}

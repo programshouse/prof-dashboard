@@ -78,7 +78,7 @@ export default function ProfileList({ onEdit }) {
             >
               {row.title || "—"}
             </button>
-            <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+            <div className="text-xs text-gray-500 truncate">
               ID: <span className="font-mono">{getId(row) || "—"}</span>
             </div>
           </div>
@@ -90,7 +90,7 @@ export default function ProfileList({ onEdit }) {
         render: (row) => {
           const t = (row.description || "").toString();
           return (
-            <div className="text-gray-700 dark:text-gray-300 max-w-[520px] line-clamp-2" title={t}>
+            <div className="text-gray-700 max-w-[520px] line-clamp-2" title={t}>
               {t || <span className="text-gray-400">—</span>}
             </div>
           );
@@ -100,7 +100,7 @@ export default function ProfileList({ onEdit }) {
         key: "features",
         header: "Features",
         render: (row) => (
-          <span className="inline-flex items-center px-2 py-0.5 text-xs rounded-md bg-brand-50 text-brand-700 border border-brand-200 dark:bg-brand-900/10 dark:text-brand-300 dark:border-brand-800">
+          <span className="inline-flex items-center px-2 py-0.5 text-xs rounded-md bg-brand-50 text-brand-700 border border-brand-200 ">
             {(row.features || []).length} items
           </span>
         ),
@@ -115,12 +115,12 @@ export default function ProfileList({ onEdit }) {
           return (
             <div className="flex items-center gap-2">
               {hasImg && (
-                <span className="text-xs px-2 py-0.5 rounded-md border border-gray-300 dark:border-gray-700">
+                <span className="text-xs px-2 py-0.5 rounded-md border border-gray-300 ">
                   Image
                 </span>
               )}
               {hasVid && (
-                <span className="text-xs px-2 py-0.5 rounded-md border border-gray-300 dark:border-gray-700">
+                <span className="text-xs px-2 py-0.5 rounded-md border border-gray-300 ">
                   Video
                 </span>
               )}
@@ -137,9 +137,9 @@ export default function ProfileList({ onEdit }) {
       <PageLayout title="Profile List | ProfMSE">
         <div className="col-span-12">
           <PageHeader title="Profile List" description="Manage your professional profile" />
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 text-center">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500 mx-auto" />
-            <p className="mt-2 text-gray-600 dark:text-gray-300">Loading profiles…</p>
+            <p className="mt-2 text-gray-600 ">Loading profiles…</p>
           </div>
         </div>
       </PageLayout>
@@ -150,7 +150,7 @@ export default function ProfileList({ onEdit }) {
     <PageLayout title="Profile List | ProfMSE">
       <div className="col-span-12">
         <PageHeader title="Profile List" description="Manage your professional profile" />
-        <div className="overflow-x-auto rounded-xl border border-brand-200 bg-white dark:bg-gray-800 shadow">
+        <div className="overflow-x-auto rounded-xl border border-brand-200 bg-white shadow">
           <AdminTable
             title="Profiles"
             data={rows}

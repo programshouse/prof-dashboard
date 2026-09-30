@@ -173,7 +173,7 @@ export default function BlogFormTiny({
     >
       {/* Title */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
           Blog Title *
         </label>
         <input
@@ -184,8 +184,8 @@ export default function BlogFormTiny({
           maxLength={140}
           disabled={isReadOnly}
           placeholder="Write a clear, searchable title…"
-          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-            isReadOnly ? "bg-gray-100 dark:bg-gray-800 cursor-not-allowed" : "border-gray-300 focus:ring-brand-500"
+          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
+            isReadOnly ? "bg-gray-100 cursor-not-allowed" : "border-gray-300 focus:ring-brand-500"
           }`}
         />
         <p className="text-xs text-gray-500 mt-1">{title.length}/140</p>
@@ -193,7 +193,7 @@ export default function BlogFormTiny({
 
       {/* Category */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
           Category *
         </label>
         <input
@@ -204,8 +204,8 @@ export default function BlogFormTiny({
           maxLength={50}
           disabled={isReadOnly}
           placeholder="e.g., Technology, Business, Lifestyle..."
-          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-            isReadOnly ? "bg-gray-100 dark:bg-gray-800 cursor-not-allowed" : "border-gray-300 focus:ring-brand-500"
+          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
+            isReadOnly ? "bg-gray-100 cursor-not-allowed" : "border-gray-300 focus:ring-brand-500"
           }`}
         />
         <p className="text-xs text-gray-500 mt-1">{category.length}/50</p>
@@ -213,7 +213,7 @@ export default function BlogFormTiny({
 
       {/* Alt Text */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
           Alt Text (for image accessibility)
         </label>
         <input
@@ -223,8 +223,8 @@ export default function BlogFormTiny({
           maxLength={255}
           disabled={isReadOnly}
           placeholder="Describe the image for screen readers"
-          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-            isReadOnly ? "bg-gray-100 dark:bg-gray-800 cursor-not-allowed" : "border-gray-300 focus:ring-brand-500"
+          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
+            isReadOnly ? "bg-gray-100 cursor-not-allowed" : "border-gray-300 focus:ring-brand-500"
           }`}
         />
         <p className="text-xs text-gray-500 mt-1">{alt.length}/255</p>
@@ -232,7 +232,7 @@ export default function BlogFormTiny({
 
       {/* Link (optional) */}
       {/* <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
           Link (optional)
         </label>
         <input
@@ -246,11 +246,11 @@ export default function BlogFormTiny({
             validateLink(e.target.value);
           }}
           placeholder="https://example.com/blog"
-          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
+          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
             linkError && !isReadOnly
               ? "border-red-500 focus:ring-red-400"
               : isReadOnly
-              ? "bg-gray-100 dark:bg-gray-800 cursor-not-allowed"
+              ? "bg-gray-100 cursor-not-allowed"
               : "border-gray-300 focus:ring-brand-500"
           }`}
           inputMode="url"
@@ -289,7 +289,7 @@ export default function BlogFormTiny({
 
       {/* Content */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
           Content *
         </label>
         <Editor

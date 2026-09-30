@@ -99,21 +99,21 @@ export default function BlogList({ onEdit, onAdd }) {
                 <img
                   src={iconUrl}
                   alt={t}
-                  className="w-10 h-10 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
+                  className="w-10 h-10 object-cover rounded-lg border border-gray-200 "
                 />
               ) : (
-                <div className="w-10 h-10 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                <div className="w-10 h-10 rounded-lg border border-gray-200 bg-gray-100 flex items-center justify-center">
+                  <span className="text-xs font-medium text-gray-500 ">
                     {initials(t)}
                   </span>
                 </div>
               )}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="font-medium text-gray-900 dark:text-white truncate" title={t}>
+              <div className="font-medium text-gray-900 truncate" title={t}>
                 {t}
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">
+              <div className="text-xs text-gray-500 ">
                 ID: {id || "—" }
               </div>
             </div>
@@ -122,7 +122,7 @@ export default function BlogList({ onEdit, onAdd }) {
                 href={l}
                 target="_blank"
                 rel="noreferrer"
-                className="ml-auto inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md border border-brand-200 dark:border-brand-800 text-brand-700 dark:text-brand-300 hover:bg-brand-50 dark:hover:bg-brand-900/20 transition"
+                className="ml-auto inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md border border-brand-200 text-brand-700 hover:bg-brand-50 transition"
                 title={l}
               >
                 Visit
@@ -142,8 +142,8 @@ export default function BlogList({ onEdit, onAdd }) {
       render: (row) => {
         const category = row?.category || "—";
         return (
-          <div className="text-gray-700 dark:text-gray-300 max-w-xs">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+          <div className="text-gray-700 max-w-xs">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 ">
               {category}
             </span>
           </div>
@@ -158,7 +158,7 @@ export default function BlogList({ onEdit, onAdd }) {
     //     const text = stripHtml(html);
     //     return (
     //       <div
-    //         className="text-gray-700 dark:text-gray-300 max-w-2xl line-clamp-2"
+    // className="text-gray-700 max-w-2xl line-clamp-2"
     //         title={text.length > 200 ? text.slice(0, 500) : text}
     //       >
     //         {text || <span className="text-gray-400">—</span>}
@@ -177,7 +177,7 @@ export default function BlogList({ onEdit, onAdd }) {
     //         href={l}
     //         target="_blank"
     //         rel="noreferrer"
-    //         className="inline-flex items-center px-2 py-1 text-xs rounded-md bg-brand-50 text-brand-700 border border-brand-200 hover:bg-brand-100 dark:bg-brand-900/10 dark:text-brand-300 dark:border-brand-800"
+    // className="inline-flex items-center px-2 py-1 text-xs rounded-md bg-brand-50 text-brand-700 border border-brand-200 hover:bg-brand-100 "
     //         title={l}
     //       >
     //         {l}
@@ -196,7 +196,7 @@ export default function BlogList({ onEdit, onAdd }) {
           <img
             src={iconUrl}
             alt={row?.title || "icon"}
-            className="w-12 h-12 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
+            className="w-12 h-12 object-cover rounded-lg border border-gray-200 "
           />
         );
       },
@@ -208,9 +208,9 @@ export default function BlogList({ onEdit, onAdd }) {
       <PageLayout title="Blogs Management | ProfMSE">
         <PageHeader title="Blogs Management" description="Manage blog posts that appear on the website" />
         <div className="col-span-12">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 text-center">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-500 mx-auto" />
-            <p className="mt-2 text-gray-600 dark:text-gray-300">Loading blogs...</p>
+            <p className="mt-2 text-gray-600 ">Loading blogs...</p>
           </div>
         </div>
       </PageLayout>
@@ -224,8 +224,8 @@ export default function BlogList({ onEdit, onAdd }) {
 
       <div className="col-span-12 mb-4">
         <div className="flex items-center justify-between gap-3">
-          <div className="text-sm text-gray-500 dark:text-gray-400">
-            Total: <span className="font-medium text-gray-700 dark:text-gray-200">{blogs?.length || 0}</span>
+          <div className="text-sm text-gray-500 ">
+            Total: <span className="font-medium text-gray-700 ">{blogs?.length || 0}</span>
           </div>
           {onAdd && (
             <button

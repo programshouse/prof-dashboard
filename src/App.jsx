@@ -9,6 +9,7 @@ import { useAuthStore } from "./stores/useAuthStore";
 import SignIn from "./pages/AuthPages/Signin";
 import SignUp from "./pages/AuthPages/SignUp";
 import NotFound from "./pages/OtherPage/NotFound";
+import RouteError from "./pages/OtherPage/RouteError";
 import Card from "./components/ui/card.jsx";
 // import Videos from "./pages/VideoPage/Videos";
 // import Images from "./pages/ImagePage/Images";
@@ -58,6 +59,7 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <AppLayout />,
+    errorElement: <RouteError />,
         children: [
           { index: true, element: <Home /> },
           { path: "/who-am-i", element: <Profile /> },
@@ -113,7 +115,11 @@ export default function App() {
   }, [checkSession, loadUserFromStorage]);
 
   if (!isInitialized) {
-    return <div>Loading...</div>; 
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-brand-100 border-t-brand-600" />
+      </div>
+    );
   }
   return <RouterProvider router={router} />;
 }

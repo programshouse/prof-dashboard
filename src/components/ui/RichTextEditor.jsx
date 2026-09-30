@@ -53,18 +53,18 @@ const RichTextEditor = ({
 
   return (
     <div className={className}>
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+      <label className="block text-sm font-medium text-gray-700 mb-2">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       
-      <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
+      <div className="border border-gray-300 rounded-lg overflow-hidden">
         {/* Toolbar */}
-        <div className="bg-gray-50 dark:bg-gray-700 px-3 py-2 border-b border-gray-300 dark:border-gray-600 flex gap-2">
+        <div className="bg-gray-50 px-3 py-2 border-b border-gray-300 flex gap-2">
           <button
             type="button"
             onClick={() => execCommand('bold')}
-            className={`p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600 ${
-              isBold ? 'bg-gray-200 dark:bg-gray-600' : ''
+            className={`p-2 rounded hover:bg-gray-200 ${
+              isBold ? 'bg-gray-200 ' : ''
             }`}
             title="Bold (Ctrl+B)"
           >
@@ -76,8 +76,8 @@ const RichTextEditor = ({
           <button
             type="button"
             onClick={() => execCommand('italic')}
-            className={`p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600 ${
-              isItalic ? 'bg-gray-200 dark:bg-gray-600' : ''
+            className={`p-2 rounded hover:bg-gray-200 ${
+              isItalic ? 'bg-gray-200 ' : ''
             }`}
             title="Italic (Ctrl+I)"
           >
@@ -89,8 +89,8 @@ const RichTextEditor = ({
           <button
             type="button"
             onClick={() => execCommand('underline')}
-            className={`p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600 ${
-              isUnderline ? 'bg-gray-200 dark:bg-gray-600' : ''
+            className={`p-2 rounded hover:bg-gray-200 ${
+              isUnderline ? 'bg-gray-200 ' : ''
             }`}
             title="Underline (Ctrl+U)"
           >
@@ -99,12 +99,12 @@ const RichTextEditor = ({
             </svg>
           </button>
           
-          <div className="border-l border-gray-300 dark:border-gray-600 mx-2"></div>
+          <div className="border-l border-gray-300 mx-2"></div>
           
           <button
             type="button"
             onClick={() => execCommand('insertUnorderedList')}
-            className="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+            className="p-2 rounded hover:bg-gray-200 "
             title="Bullet List"
           >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -115,7 +115,7 @@ const RichTextEditor = ({
           <button
             type="button"
             onClick={() => execCommand('insertOrderedList')}
-            className="p-2 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+            className="p-2 rounded hover:bg-gray-200 "
             title="Numbered List"
           >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -133,7 +133,7 @@ const RichTextEditor = ({
           onKeyDown={handleKeyDown}
           onMouseUp={updateToolbarState}
           onKeyUp={updateToolbarState}
-          className="min-h-[200px] p-4 focus:outline-none dark:bg-gray-800 dark:text-white"
+          className="min-h-[200px] p-4 focus:outline-none "
           style={{ minHeight: '200px' }}
         />
       </div>

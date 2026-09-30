@@ -35,15 +35,15 @@ export default function Modal({
 
       {/* Dialog */}
       <div className={`relative w-full ${size} mx-auto`}>
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
           {/* Header */}
-          <div className="px-5 py-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900 ">
               {title}
             </h3>
             <button
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              className="text-gray-500 hover:text-gray-700 "
               aria-label="Close"
             >
               ✕

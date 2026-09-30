@@ -145,7 +145,7 @@ export default function ServiceDetails() {
       <PageLayout title="Service Details | ProfMSE">
         <PageHeader title="Service Details" description="View and edit a service" />
         <div className="mx-auto max-w-3xl px-4">
-          <div className="h-64 rounded-lg border bg-white dark:bg-gray-800 animate-pulse" />
+          <div className="h-64 rounded-lg border bg-white animate-pulse" />
         </div>
       </PageLayout>
     );
@@ -160,7 +160,7 @@ export default function ServiceDetails() {
           </Link>
         </PageHeader>
         <div className="mx-auto max-w-3xl px-4">
-          <div className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-700 dark:border-red-700/40 dark:bg-red-900/20 dark:text-red-300">
+          <div className="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-700 ">
             {error || "Service not found"}
           </div>
         </div>
@@ -196,9 +196,9 @@ export default function ServiceDetails() {
 
       <main className="mx-auto max-w-3xl px-4 pb-24">
         {!editMode ? (
-          <article className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <article className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             {/* Image */}
-            <div className="w-full h-64 bg-gray-50 dark:bg-gray-700">
+            <div className="w-full h-64 bg-gray-50 ">
               {imageUrl ? (
                 <img src={imageUrl} alt={svc?.title} className="w-full h-full object-cover" />
               ) : (
@@ -210,8 +210,8 @@ export default function ServiceDetails() {
 
             {/* Body */}
             <div className="p-6 space-y-4">
-              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">{svc?.title}</h2>
-              <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line">
+              <h2 className="text-2xl font-semibold text-gray-900 ">{svc?.title}</h2>
+              <p className="text-gray-700 whitespace-pre-line">
                 {svc?.description || "—"}
               </p>
 
@@ -241,11 +241,11 @@ export default function ServiceDetails() {
         ) : (
           <form
             onSubmit={onSave}
-            className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-5"
+            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-5"
           >
             {/* Title */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Title *
               </label>
               <input
@@ -254,13 +254,13 @@ export default function ServiceDetails() {
                 value={form.title}
                 onChange={onChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent "
               />
             </div>
 
             {/* Description */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Description *
               </label>
               <textarea
@@ -269,13 +269,13 @@ export default function ServiceDetails() {
                 value={form.description}
                 onChange={onChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent "
               />
             </div>
 
             {/* Link (optional) */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Link (optional)
               </label>
               <input
@@ -286,7 +286,7 @@ export default function ServiceDetails() {
                 placeholder="https://example.com/service"
                 className={`${
                   linkError ? "border-red-500 focus:ring-red-400" : "border-gray-300 focus:ring-brand-500"
-                } w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
+                } w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent `}
                 inputMode="url"
                 pattern="https?://.*"
               />
@@ -295,7 +295,7 @@ export default function ServiceDetails() {
 
             {/* ✅ Video Link (optional) */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Video Link (optional)
               </label>
               <input
@@ -304,7 +304,7 @@ export default function ServiceDetails() {
                 value={form.video_link}
                 onChange={onChange}
                 placeholder="https://example.com/video"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent "
                 inputMode="url"
                 pattern="https?://.*"
               />
@@ -312,7 +312,7 @@ export default function ServiceDetails() {
 
             {/* Image URL (JSON-only version) */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Image URL (optional)
               </label>
               <input
@@ -321,13 +321,13 @@ export default function ServiceDetails() {
                 value={form.image}
                 onChange={onChange}
                 placeholder="https://www.programshouse.com/uploads/service.jpg"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 focus:border-transparent "
               />
               {!!form.image && (
                 <img
                   src={makeImageUrl(form.image)}
                   alt="Preview"
-                  className="mt-2 h-16 w-16 rounded object-cover border border-gray-200 dark:border-gray-700"
+                  className="mt-2 h-16 w-16 rounded object-cover border border-gray-200 "
                 />
               )}
             </div>
