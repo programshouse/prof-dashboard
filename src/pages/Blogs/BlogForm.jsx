@@ -27,12 +27,47 @@ export default function BlogFormTiny({
   const [category, setCategory] = useState("");
   const [alt, setAlt] = useState("");
   const [image, setImage] = useState(null); // File | string(url) | null
+  const [contentImages, setContentImages] = useState([]); // File[]
+  const [existingContentImages, setExistingContentImages] = useState([]); // string[] from API
   const [link, setLink] = useState("");
   const [linkError, setLinkError] = useState("");
 
   const fetchBlogById = useBlogsStore((s) => s.fetchBlogById);
   const createBlog = useBlogsStore((s) => s.createBlog);
   const updateBlog = useBlogsStore((s) => s.updateBlog);
+
+
+  const parseContent = (rawContent) => {
+    if (!rawContent) return { text: "", images: [] };
+
+    let parsed = rawContent;
+
+    if (typeof rawContent === "string") {
+      const trimmed = rawContent.trim();
+      if (!trimmed) return { text: "", images: [] };
+
+      try {
+        parsed = JSON.parse(trimmed);
+      } catch {
+        return { text: rawContent, images: [] };
+      }
+    }
+
+    if (!Array.isArray(parsed)) {
+      return { text: typeof rawContent === "string" ? rawContent : "", images: [] };
+    }
+
+    const text = parsed
+      .filter((item) => item?.type === "text" && typeof item?.value === "string")
+      .map((item) => item.value)
+      .join("\n");
+
+    const images = parsed
+      .filter((item) => item?.type === "image" && typeof item?.value === "string")
+      .map((item) => item.value);
+
+    return { text, images };
+  };
 
   const validateLink = (val) => {
     if (!val) {
@@ -89,7 +124,12 @@ export default function BlogFormTiny({
         const data = await fetchBlogById(resolvedId);
 
         setTitle(data?.title || "");
-        setDesc(data?.content ?? data?.description ?? "");
+
+        const parsedContent = parseContent(data?.content ?? data?.description ?? "");
+        setDesc(parsedContent.text);
+        setExistingContentImages(parsedContent.images);
+        setContentImages([]);
+
         setCategory(data?.category || "");
         setAlt(data?.alt || "");
         // ✅ use "image" from API (not icon)
@@ -127,6 +167,11 @@ export default function BlogFormTiny({
       if (image instanceof File) {
         fd.append("image", image);
       }
+
+      // Blog body images. Laravel receives these as content_images[].
+      contentImages.forEach((file) => {
+        fd.append("content_images[]", file);
+      });
 
       // Create vs Update
       if (resolvedId) {
@@ -285,6 +330,87 @@ export default function BlogFormTiny({
             Current image is already stored as URL in the API.
           </p>
         )}
+      </div>
+
+      {/* Content images */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Content Images
+        </label>
+
+        {!isReadOnly && (
+          <label className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 px-6 py-8 text-center transition-colors hover:border-brand-500">
+            <svg
+              className="mb-3 h-10 w-10 text-gray-400"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5V19a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2.5M16 8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            <span className="font-medium text-gray-700">Upload content images</span>
+            <span className="mt-1 text-xs text-gray-500">You can select more than one image</span>
+            <input
+              type="file"
+              name="content_images[]"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => {
+                const files = Array.from(e.target.files || []);
+                if (!files.length) return;
+                setContentImages((current) => [...current, ...files]);
+                e.target.value = "";
+              }}
+            />
+          </label>
+        )}
+
+        {(existingContentImages.length > 0 || contentImages.length > 0) && (
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+            {existingContentImages.map((src, index) => (
+              <div key={`existing-${src}-${index}`} className="relative overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
+                <img
+                  src={src}
+                  alt={`Content ${index + 1}`}
+                  className="h-28 w-full object-cover"
+                />
+                <div className="px-2 py-1.5 text-center text-xs text-gray-500">Saved image</div>
+              </div>
+            ))}
+
+            {contentImages.map((file, index) => {
+              const previewUrl = URL.createObjectURL(file);
+              return (
+                <div key={`${file.name}-${file.lastModified}-${index}`} className="relative overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
+                  <img
+                    src={previewUrl}
+                    alt={file.name}
+                    className="h-28 w-full object-cover"
+                    onLoad={() => URL.revokeObjectURL(previewUrl)}
+                  />
+                  {!isReadOnly && (
+                    <button
+                      type="button"
+                      onClick={() => setContentImages((current) => current.filter((_, i) => i !== index))}
+                      className="absolute right-2 top-2 rounded-full bg-red-600 px-2 py-1 text-xs font-semibold text-white shadow"
+                    >
+                      Remove
+                    </button>
+                  )}
+                  <div className="truncate px-2 py-1.5 text-xs text-gray-600" title={file.name}>
+                    {file.name}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        <p className="mt-2 text-xs text-gray-500">
+          These files are sent as <code>content_images[]</code>. The API can combine them with the Content text into the blog content.
+        </p>
       </div>
 
       {/* Content */}
