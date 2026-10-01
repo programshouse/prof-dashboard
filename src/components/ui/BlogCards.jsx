@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useConfirmDelete } from "./ConfirmDeleteProvider";
 
 /**
  * BlogCards
@@ -10,6 +11,7 @@ import React, { useEffect, useMemo, useState } from "react";
  * Or just store the token in localStorage as 'authToken' | 'accessToken' | 'token'.
  */
 export default function BlogCards({ apiUrl, headers = {}, onEdit }) {
+  const confirmDelete = useConfirmDelete();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
@@ -149,7 +151,7 @@ export default function BlogCards({ apiUrl, headers = {}, onEdit }) {
   };
 
   const del = async (id) => {
-    if (!confirm("Delete this blog?")) return;
+    if (!(await confirmDelete({ title: "Delete blog?", message: "Are you sure you want to delete this blog? This action cannot be undone." }))) return;
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000);

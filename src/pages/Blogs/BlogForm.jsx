@@ -1,5 +1,5 @@
 // /src/pages/Blogs/BlogFormTiny.jsx
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import AdminForm from "../../components/ui/AdminForm";
 import FileUpload from "../../components/ui/FileUpload";
@@ -29,6 +29,8 @@ export default function BlogFormTiny({
   const [image, setImage] = useState(null); // File | string(url) | null
   const [contentImages, setContentImages] = useState([]); // File[]
   const [existingContentImages, setExistingContentImages] = useState([]); // string[] from API
+  const editorRef = useRef(null);
+  const contentImagesRef = useRef([]);
   const [link, setLink] = useState("");
   const [linkError, setLinkError] = useState("");
 
@@ -37,36 +39,164 @@ export default function BlogFormTiny({
   const updateBlog = useBlogsStore((s) => s.updateBlog);
 
 
+  const escapeHtmlAttribute = (value = "") =>
+    String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+
+  // Convert the API's ordered content blocks back into one editor document.
+  // Existing images are inserted exactly where they were saved.
   const parseContent = (rawContent) => {
-    if (!rawContent) return { text: "", images: [] };
+    if (!rawContent) return { html: "", images: [] };
 
     let parsed = rawContent;
 
-    if (typeof rawContent === "string") {
-      const trimmed = rawContent.trim();
-      if (!trimmed) return { text: "", images: [] };
+    // Some older responses may be JSON encoded more than once.
+    for (let i = 0; i < 2 && typeof parsed === "string"; i += 1) {
+      const trimmed = parsed.trim();
+      if (!trimmed) return { html: "", images: [] };
 
       try {
-        parsed = JSON.parse(trimmed);
+        const decoded = JSON.parse(trimmed);
+        parsed = decoded;
       } catch {
-        return { text: rawContent, images: [] };
+        return { html: rawContent, images: [] };
       }
     }
 
     if (!Array.isArray(parsed)) {
-      return { text: typeof rawContent === "string" ? rawContent : "", images: [] };
+      return { html: typeof rawContent === "string" ? rawContent : "", images: [] };
     }
 
-    const text = parsed
-      .filter((item) => item?.type === "text" && typeof item?.value === "string")
-      .map((item) => item.value)
-      .join("\n");
+    const images = [];
+    const html = parsed
+      .map((item) => {
+        if (item?.type === "text") {
+          return typeof item?.value === "string" ? item.value : "";
+        }
 
-    const images = parsed
-      .filter((item) => item?.type === "image" && typeof item?.value === "string")
-      .map((item) => item.value);
+        if (item?.type === "image" && typeof item?.value === "string" && item.value) {
+          images.push(item.value);
+          const src = escapeHtmlAttribute(item.value);
+          const alt = escapeHtmlAttribute(item?.alt || "");
+          return `<div class="blog-content-image" data-blog-image-block="existing" data-blog-existing-src="${src}"><img src="${src}" alt="${alt}" data-blog-existing-image="1" /></div>`;
+        }
 
-    return { text, images };
+        return "";
+      })
+      .join("");
+
+    return { html, images };
+  };
+
+  const hasMeaningfulContent = (html) => {
+    if (!html) return false;
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    return !!doc.body.textContent?.trim() || !!doc.body.querySelector("img[data-blog-content-image], img[data-blog-existing-image], img[src]");
+  };
+
+  // Build the exact ordered JSON expected by Laravel:
+  // text -> image -> text -> image -> text ...
+  // IMPORTANT: replace the WHOLE image block, not only <img>.
+  // Replacing only <img> leaves the marker inside <p>/<div>, which can make
+  // Create serialize the text first and the images later.
+  const buildOrderedContent = (html) => {
+    const doc = new DOMParser().parseFromString(html || "", "text/html");
+    const body = doc.body;
+    const markers = [];
+
+    body.querySelectorAll("[data-blog-image-block]").forEach((block) => {
+      const img = block.querySelector("img");
+      if (!img) return;
+
+      const newIndex = block.getAttribute("data-blog-content-image-index");
+      const existingSrc =
+        block.getAttribute("data-blog-existing-src") ||
+        img.getAttribute("src") ||
+        "";
+      const altText = img.getAttribute("alt") || null;
+
+      const markerIndex = markers.length;
+
+      if (newIndex !== null && newIndex !== "") {
+        markers.push({
+          type: "image",
+          image_index: Number(newIndex),
+          alt: altText,
+        });
+      } else if (existingSrc) {
+        markers.push({
+          type: "image",
+          value: existingSrc,
+          alt: altText,
+        });
+      } else {
+        return;
+      }
+
+      block.replaceWith(doc.createTextNode(`__BLOG_IMAGE_${markerIndex}__`));
+    });
+
+    const serialized = body.innerHTML;
+    const parts = serialized.split(/(__BLOG_IMAGE_\d+__)/g);
+    const ordered = [];
+
+    parts.forEach((part) => {
+      const markerMatch = part.match(/^__BLOG_IMAGE_(\d+)__$/);
+
+      if (markerMatch) {
+        const imageBlock = markers[Number(markerMatch[1])];
+        if (imageBlock) ordered.push(imageBlock);
+        return;
+      }
+
+      if (!part) return;
+
+      const testDoc = new DOMParser().parseFromString(part, "text/html");
+      const hasText = !!testDoc.body.textContent?.trim();
+      const hasMedia = !!testDoc.body.querySelector(
+        "video,audio,iframe,table,ul,ol,blockquote,pre"
+      );
+
+      // Ignore empty paragraphs that TinyMCE adds around image blocks.
+      if (!hasText && !hasMedia) return;
+
+      ordered.push({
+        type: "text",
+        value: part,
+      });
+    });
+
+    return ordered;
+  };
+
+  const addImagesAtEditorCursor = (files) => {
+    if (!files?.length || !editorRef.current) return;
+
+    const editor = editorRef.current;
+
+    // Restore the last cursor position inside the editor (important when the
+    // files were picked from the outside "Content Images" box, where the
+    // editor has lost focus). Without this the image can land at the wrong place.
+    editor.focus();
+
+    const startIndex = contentImagesRef.current.length;
+    const nextFiles = [...contentImagesRef.current, ...files];
+
+    contentImagesRef.current = nextFiles;
+    setContentImages(nextFiles);
+
+    files.forEach((file, offset) => {
+      const imageIndex = startIndex + offset;
+      const previewUrl = URL.createObjectURL(file);
+      const altText = escapeHtmlAttribute(file.name || "Content image");
+
+      editor.insertContent(
+        `<div class="blog-content-image" data-blog-image-block="new" data-blog-content-image-index="${imageIndex}"><img src="${previewUrl}" alt="${altText}" data-blog-content-image="1" /></div><p><br></p>`
+      );
+    });
   };
 
   const validateLink = (val) => {
@@ -126,8 +256,9 @@ export default function BlogFormTiny({
         setTitle(data?.title || "");
 
         const parsedContent = parseContent(data?.content ?? data?.description ?? "");
-        setDesc(parsedContent.text);
+        setDesc(parsedContent.html);
         setExistingContentImages(parsedContent.images);
+        contentImagesRef.current = [];
         setContentImages([]);
 
         setCategory(data?.category || "");
@@ -141,6 +272,55 @@ export default function BlogFormTiny({
     })();
   }, [resolvedId, fetchBlogById]);
 
+  // Build the same multipart body for create and update.
+  const buildFormData = (orderedContent) => {
+    const fd = new FormData();
+    fd.append("title", title.trim());
+    fd.append("content", JSON.stringify(orderedContent));
+    fd.append("category", category.trim());
+    fd.append("alt", alt.trim());
+    if (link?.trim()) fd.append("link", link.trim());
+    return fd;
+  };
+
+  // CREATE -> make it behave exactly like UPDATE.
+  //
+  // Update keeps the order correctly because every image block already carries
+  // its final URL (`value`). On create the images are brand new, so the server
+  // only knows `image_index`, and it can place them after the text.
+  // Fix: after the create call, read the URLs the server just stored for the
+  // uploaded images (in upload order), swap every `image_index` for its real URL
+  // and save once through the normal UPDATE request. The final saved content is
+  // then identical to what Update produces.
+  const finalizeCreatedOrder = async (created, orderedContent) => {
+    const uploadedCount = contentImagesRef.current.length;
+    if (!uploadedCount || !created?.id) return;
+
+    let urls = parseContent(created?.content).images;
+
+    if (urls.length !== uploadedCount) {
+      const fresh = await fetchBlogById(created.id);
+      urls = parseContent(fresh?.content).images;
+    }
+
+    if (urls.length !== uploadedCount) {
+      throw new Error(
+        `Expected ${uploadedCount} stored content images but the server returned ${urls.length}`
+      );
+    }
+
+    const finalContent = orderedContent.map((block) => {
+      if (block.type === "image" && block.image_index !== undefined) {
+        return { type: "image", value: urls[block.image_index], alt: block.alt };
+      }
+      return block;
+    });
+
+    const fd = buildFormData(finalContent);
+    fd.append("_method", "PATCH");
+    await updateBlog(created.id, fd, { forcePost: true });
+  };
+
   const submit = async (e) => {
     e.preventDefault();
 
@@ -149,19 +329,19 @@ export default function BlogFormTiny({
       return;
     }
 
-    if (!title.trim() || !description.trim()) return;
+    if (!title.trim() || !hasMeaningfulContent(description)) return;
     if (!validateLink(link)) return;
 
     try {
       setSaving(true);
 
-      const fd = new FormData();
-      fd.append("title", title.trim());
-      fd.append("content", description);
-      fd.append("category", category.trim());
-      fd.append("alt", alt.trim());
+      // Read directly from TinyMCE at submit time. This avoids React state
+      // being one editor change behind on CREATE (especially immediately
+      // after inserting an image).
+      const liveEditorHtml = editorRef.current?.getContent() ?? description;
+      const orderedContent = buildOrderedContent(liveEditorHtml);
 
-      if (link?.trim()) fd.append("link", link.trim());
+      const fd = buildFormData(orderedContent);
 
       // ✅ only send file if it is File (real upload)
       if (image instanceof File) {
@@ -169,7 +349,9 @@ export default function BlogFormTiny({
       }
 
       // Blog body images. Laravel receives these as content_images[].
-      contentImages.forEach((file) => {
+      // Use the ref here, not React state, so Create also works if the user
+      // inserts an image and immediately clicks Create Blog.
+      contentImagesRef.current.forEach((file) => {
         fd.append("content_images[]", file);
       });
 
@@ -179,7 +361,16 @@ export default function BlogFormTiny({
         fd.append("_method", "PATCH");
         await updateBlog(resolvedId, fd, { forcePost: true });
       } else {
-        await createBlog(fd);
+        const created = await createBlog(fd);
+
+        try {
+          await finalizeCreatedOrder(created, orderedContent);
+        } catch (orderErr) {
+          console.error("Could not finalize content order:", orderErr);
+          alert(
+            "Blog was created, but the image order could not be finalized. Open the blog and click Update to fix the order."
+          );
+        }
       }
 
       onSuccess?.();
@@ -214,7 +405,7 @@ export default function BlogFormTiny({
       onSubmit={submit}
       onCancel={cancel}
       submitText={isReadOnly ? "Close" : saving ? "Saving..." : resolvedId ? "Update Blog" : "Create Blog"}
-      submitDisabled={isReadOnly ? false : saving || !title.trim() || !description.trim() || !category.trim() || !!linkError}
+      submitDisabled={isReadOnly ? false : saving || !title.trim() || !hasMeaningfulContent(description) || !category.trim() || !!linkError}
     >
       {/* Title */}
       <div className="mb-6">
@@ -275,35 +466,6 @@ export default function BlogFormTiny({
         <p className="text-xs text-gray-500 mt-1">{alt.length}/255</p>
       </div>
 
-      {/* Link (optional) */}
-      {/* <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Link (optional)
-        </label>
-        <input
-          type="url"
-          name="link"
-          value={link}
-          disabled={isReadOnly}
-          onChange={(e) => {
-            if (isReadOnly) return;
-            setLink(e.target.value);
-            validateLink(e.target.value);
-          }}
-          placeholder="https://example.com/blog"
-          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
-            linkError && !isReadOnly
-              ? "border-red-500 focus:ring-red-400"
-              : isReadOnly
-              ? "bg-gray-100 cursor-not-allowed"
-              : "border-gray-300 focus:ring-brand-500"
-          }`}
-          inputMode="url"
-          pattern="https?://.*"
-        />
-        {linkError && !isReadOnly && <p className="mt-1 text-xs text-red-600">{linkError}</p>}
-      </div> */}
-
       {/* Image */}
       <div className="mb-6">
         {/* ✅ IMPORTANT: name="image" */}
@@ -360,7 +522,7 @@ export default function BlogFormTiny({
               onChange={(e) => {
                 const files = Array.from(e.target.files || []);
                 if (!files.length) return;
-                setContentImages((current) => [...current, ...files]);
+                addImagesAtEditorCursor(files);
                 e.target.value = "";
               }}
             />
@@ -390,15 +552,6 @@ export default function BlogFormTiny({
                     className="h-28 w-full object-cover"
                     onLoad={() => URL.revokeObjectURL(previewUrl)}
                   />
-                  {!isReadOnly && (
-                    <button
-                      type="button"
-                      onClick={() => setContentImages((current) => current.filter((_, i) => i !== index))}
-                      className="absolute right-2 top-2 rounded-full bg-red-600 px-2 py-1 text-xs font-semibold text-white shadow"
-                    >
-                      Remove
-                    </button>
-                  )}
                   <div className="truncate px-2 py-1.5 text-xs text-gray-600" title={file.name}>
                     {file.name}
                   </div>
@@ -409,7 +562,7 @@ export default function BlogFormTiny({
         )}
 
         <p className="mt-2 text-xs text-gray-500">
-          These files are sent as <code>content_images[]</code>. The API can combine them with the Content text into the blog content.
+          Images are uploaded as <code>content_images[]</code> and inserted at the current editor cursor, so the saved order stays exactly the same. To remove an image, delete it directly from the editor.
         </p>
       </div>
 
@@ -420,6 +573,9 @@ export default function BlogFormTiny({
         </label>
         <Editor
           apiKey={apiKey}
+          onInit={(_, editor) => {
+            editorRef.current = editor;
+          }}
           value={description}
           onEditorChange={(html) => !isReadOnly && setDesc(html)}
           init={{
@@ -427,13 +583,46 @@ export default function BlogFormTiny({
             menubar: false,
             readonly: isReadOnly ? 1 : 0,
             plugins:
-              "anchor autolink charmap code codesample directionality emoticons image link lists media preview searchreplace table visualblocks wordcount",
+              "anchor autolink charmap code codesample directionality emoticons link lists media preview searchreplace table visualblocks wordcount",
             toolbar: isReadOnly
               ? "preview | code"
-              : "undo redo | blocks | bold italic underline strikethrough | align bullist numlist outdent indent | link image media table | removeformat | ltr rtl | code preview",
+              : "undo redo | blocks | bold italic underline strikethrough | align bullist numlist outdent indent | link contentimage media table | removeformat | ltr rtl | code preview",
+            setup: (editor) => {
+              // Use the same upload flow as the Content Images field.
+              // No image URL/src dialog is shown.
+              editor.ui.registry.addButton("contentimage", {
+                icon: "image",
+                tooltip: "Upload content image",
+                enabled: !isReadOnly,
+                onAction: () => {
+                  if (isReadOnly) return;
+
+                  const input = document.createElement("input");
+                  input.type = "file";
+                  input.accept = "image/*";
+                  input.multiple = true;
+
+                  input.onchange = () => {
+                    const files = Array.from(input.files || []);
+                    if (!files.length) return;
+                    addImagesAtEditorCursor(files);
+                  };
+
+                  input.click();
+                },
+              });
+            },
             convert_urls: false,
-            content_style:
-              "body{font-family:Inter,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif; font-size:15px; line-height:1.7;}",
+            // Content image size inside the editor. Change --blog-img-max to
+            // make images bigger/smaller (it should match the site later).
+            content_style: `
+              :root{--blog-img-max:480px;}
+              body{font-family:Inter,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif; font-size:15px; line-height:1.7;}
+              .blog-content-image{margin:16px auto; text-align:center;}
+              .blog-content-image img,
+              img{display:block; max-width:min(100%, var(--blog-img-max)); width:auto; height:auto; margin:0 auto; border-radius:8px;}
+              iframe,video,table{max-width:100%;}
+            `,
           }}
         />
       </div>
