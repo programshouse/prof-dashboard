@@ -5,6 +5,7 @@ import PageHeader from "../../components/ui/PageHeader";
 import Button from "../../components/ui/button/Button";
 import Toaster, { notify } from "../../components/ui/Toaster/Toaster";
 import { useToolsStore } from "../../stores/useToolsStore";
+import { useConfirmDelete } from "../../components/ui/ConfirmDeleteProvider";
 
 const getApiId = (t) => t?.id ?? t?._id ?? t?.uuid ?? null;
 
@@ -17,6 +18,7 @@ const makeAbsolute = (path) => {
 };
 
 export default function ToolList({ onEdit, onAdd }) {
+  const confirmDelete = useConfirmDelete();
   const navigate = useNavigate();
 
   const tools = useToolsStore((s) => s.tools) || [];
@@ -58,7 +60,7 @@ export default function ToolList({ onEdit, onAdd }) {
   const handleDelete = async (tool) => {
     const id = getApiId(tool);
     if (!id) { notify.action("delete").error("Missing tool id"); return; }
-    if (!window.confirm(`Are you sure you want to delete "${tool?.title || "Tool"}"?`)) return;
+    if (!(await confirmDelete({ title: "Delete tool?", message: `Are you sure you want to delete "${tool?.title || "Tool"}"? This action cannot be undone.` }))) return;
 
     try {
       setDeletingIds((p) => new Set(p).add(id));

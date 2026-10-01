@@ -5,13 +5,16 @@ import "swiper/swiper-bundle.css";
 import "flatpickr/dist/flatpickr.css";
 import App from "./App";
 import { AppWrapper } from "./components/common/PageMeta";
+import { ConfirmDeleteProvider } from "./components/ui/ConfirmDeleteProvider";
 
 const rootElement = document.getElementById("root");
 if (rootElement) {
   createRoot(rootElement).render(
     <StrictMode>
       <AppWrapper>
-        <App />
+        <ConfirmDeleteProvider>
+          <App />
+        </ConfirmDeleteProvider>
       </AppWrapper>
     </StrictMode>,
   );

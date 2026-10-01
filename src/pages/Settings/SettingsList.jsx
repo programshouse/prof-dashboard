@@ -7,10 +7,12 @@ import Button from "../../components/ui/button/Button";
 import AdminTable from "../../components/ui/AdminTable";
 import Toaster, { notify } from "../../components/ui/Toaster/Toaster";
 import { useSettingsStore } from "../../stores/useSettingsStore";
+import { useConfirmDelete } from "../../components/ui/ConfirmDeleteProvider";
 
 const getId = (x) => x?.id ?? x?._id ?? x?.uuid ?? null;
 
 export default function SettingsList({ onEdit }) {
+  const confirmDelete = useConfirmDelete();
   const navigate = useNavigate();
 
   const loading        = useSettingsStore((s) => s.loading);
@@ -42,7 +44,7 @@ export default function SettingsList({ onEdit }) {
   };
 
   const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete current settings?")) return;
+    if (!(await confirmDelete({ title: "Delete settings?", message: "Are you sure you want to delete the current settings? This action cannot be undone." }))) return;
     try {
       setDeleting(true);
       await deleteSettings();

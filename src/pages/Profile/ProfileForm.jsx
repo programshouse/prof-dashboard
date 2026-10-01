@@ -5,6 +5,7 @@ import PageHeader from "../../components/ui/PageHeader";
 import AdminForm from "../../components/ui/AdminForm";
 import Button from "../../components/ui/button/Button";
 import { useWhoAmIStore } from "../../stores/useWhoAmIStore";
+import { useConfirmDelete } from "../../components/ui/ConfirmDeleteProvider";
 
 /* ---------- URL helper ---------- */
 const ORIGIN = "https://www.programshouse.com";
@@ -50,6 +51,7 @@ const INITIAL = {
 };
 
 export default function ProfileForm({ onSuccess }) {
+  const confirmDelete = useConfirmDelete();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -320,7 +322,7 @@ export default function ProfileForm({ onSuccess }) {
       alert("Delete is not wired in the store yet.");
       return;
     }
-    if (!window.confirm("Delete this profile?")) return;
+    if (!(await confirmDelete({ title: "Delete profile?", message: "Are you sure you want to delete this profile? This action cannot be undone." }))) return;
     try {
       setSaving(true);
       await destroy(form.id);

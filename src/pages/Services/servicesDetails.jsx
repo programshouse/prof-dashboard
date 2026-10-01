@@ -6,6 +6,7 @@ import PageHeader from "../../components/ui/PageHeader";
 import Button from "../../components/ui/button/Button";
 import Toaster, { notify } from "../../components/ui/Toaster/Toaster";
 import { useServicesStore } from "../../stores/useServicesStore";
+import { useConfirmDelete } from "../../components/ui/ConfirmDeleteProvider";
 
 const makeImageUrl = (path) => {
   if (!path) return null;
@@ -14,6 +15,7 @@ const makeImageUrl = (path) => {
 };
 
 export default function ServiceDetails() {
+  const confirmDelete = useConfirmDelete();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -129,7 +131,7 @@ export default function ServiceDetails() {
 
   const onDelete = async () => {
     if (!id) return setError("Missing service id");
-    if (!window.confirm("Delete this service? This cannot be undone.")) return;
+    if (!(await confirmDelete({ title: "Delete service?", message: "Are you sure you want to delete this service? This action cannot be undone." }))) return;
     try {
       await deleteService(id);
       notify.action("delete").success("Service deleted");

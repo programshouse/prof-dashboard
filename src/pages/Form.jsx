@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import AdminForm from "../../src/components/ui/AdminForm";
 import { settingsAPI } from "../services/api";
 import { FaFacebookF, FaInstagram, FaTwitter, FaLinkedinIn, FaWhatsapp } from "react-icons/fa";
+import { useConfirmDelete } from "../components/ui/ConfirmDeleteProvider";
 
 // Optional: wire to your real settings API
 // import { settingsAPI } from "../../services/api";
@@ -12,6 +13,7 @@ export default function SiteInfoForm({
   onSuccess,            // callback after save
   onSubmit,             // optional custom submit(payload) => Promise
 }) {
+  const confirmDelete = useConfirmDelete();
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -114,7 +116,7 @@ export default function SiteInfoForm({
   const cancel = () => onSuccess && onSuccess();
 
   const onDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete current settings?")) return;
+    if (!(await confirmDelete({ title: "Delete settings?", message: "Are you sure you want to delete the current settings? This action cannot be undone." }))) return;
     try {
       setDeleting(true);
       await settingsAPI.delete();

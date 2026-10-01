@@ -5,6 +5,7 @@ import PageHeader from "../../components/ui/PageHeader";
 import AdminForm from "../../components/ui/AdminForm";
 import Button from "../../components/ui/button/Button";
 import { useWorkshopStore } from "../../stores/useWorkshopStore";
+import { useConfirmDelete } from "../../components/ui/ConfirmDeleteProvider";
 
 /* ---------- URL helper ---------- */
 const ORIGIN = "https://www.programshouse.com";
@@ -70,6 +71,7 @@ const INITIAL = {
 const getId = (x) => x?.id ?? x?._id ?? x?.uuid ?? null;
 
 export default function WorkshopForm({ onSuccess, workshopId }) {
+  const confirmDelete = useConfirmDelete();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -400,7 +402,7 @@ export default function WorkshopForm({ onSuccess, workshopId }) {
               variant="danger"
               onClick={async () => {
                 if (!deleteworkshop) return alert("Delete is not wired in the store.");
-                if (!window.confirm("Delete this workshop?")) return;
+                if (!(await confirmDelete({ title: "Delete workshop?", message: "Are you sure you want to delete this workshop? This action cannot be undone." }))) return;
                 try {
                   setSaving(true);
                   await deleteworkshop(form.id);

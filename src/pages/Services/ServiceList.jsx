@@ -5,6 +5,7 @@ import PageHeader from "../../components/ui/PageHeader";
 import Button from "../../components/ui/button/Button";
 import Toaster, { notify } from "../../components/ui/Toaster/Toaster";
 import { useServicesStore } from "../../stores/useServicesStore";
+import { useConfirmDelete } from "../../components/ui/ConfirmDeleteProvider";
 
 const getApiId = (svc) => svc?.id ?? svc?._id ?? svc?.uuid ?? null;
 
@@ -17,6 +18,7 @@ const makeAbsolute = (path) => {
 };
 
 export default function ServiceList({ onEdit, onAdd }) {
+  const confirmDelete = useConfirmDelete();
   const navigate = useNavigate();
 
   const services = useServicesStore((s) => s.services) || [];
@@ -59,7 +61,7 @@ export default function ServiceList({ onEdit, onAdd }) {
   const handleDelete = async (svc) => {
     const id = getApiId(svc);
     if (!id) { notify.action("delete").error("Missing service id"); return; }
-    if (!window.confirm(`Are you sure you want to delete "${svc?.title || "Service"}"?`)) return;
+    if (!(await confirmDelete({ title: "Delete service?", message: `Are you sure you want to delete "${svc?.title || "Service"}"? This action cannot be undone.` }))) return;
 
     try {
       setDeletingIds((p) => new Set(p).add(id));

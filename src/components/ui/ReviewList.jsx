@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useDataStore } from "../../stores/useDataStore.js";
+import { useConfirmDelete } from "./ConfirmDeleteProvider";
 
 const Star = ({ filled }) => (
   <svg viewBox="0 0 20 20" className={`h-4 w-4 ${filled ? "text-yellow-500" : "text-gray-300"}`} fill="currentColor">
@@ -15,12 +16,13 @@ const Stars = ({ rating = 0 }) => (
 );
 
 function ReviewRow({ r, onDelete }) {
+  const confirmDelete = useConfirmDelete();
   const [busy, setBusy] = useState(false);
   const date = r.date ? new Date(r.date).toLocaleDateString() : "";
 
   const handleDelete = async () => {
     if (busy) return;
-    if (!confirm("Delete this review?")) return;
+    if (!(await confirmDelete({ title: "Delete review?", message: "Are you sure you want to delete this review? This action cannot be undone." }))) return;
     setBusy(true);
     await onDelete(r.id);
     setBusy(false);

@@ -6,6 +6,7 @@ import PageHeader from "../../components/ui/PageHeader";
 import AdminTable from "../../components/ui/AdminTable";
 import Toaster, { notify } from "../../components/ui/Toaster/Toaster";
 import { useWorkshopStore } from "../../stores/useWorkshopStore";
+import { useConfirmDelete } from "../../components/ui/ConfirmDeleteProvider";
 
 // Helpers
 const getId = (x) => x?.id ?? x?._id ?? x?.uuid ?? null;
@@ -16,6 +17,7 @@ const makeAbsolute = (path) => {
 };
 
 export default function WorkshopList({ onEdit, onAdd }) {
+  const confirmDelete = useConfirmDelete();
   const navigate = useNavigate();
 
   const workshops       = useWorkshopStore((s) => s.workshops) || [];
@@ -63,7 +65,7 @@ export default function WorkshopList({ onEdit, onAdd }) {
       notify.action("delete").error("Missing workshop id");
       return;
     }
-    if (!window.confirm(`Are you sure you want to delete "${row?.title || "Workshop"}"?`)) return;
+    if (!(await confirmDelete({ title: "Delete workshop?", message: `Are you sure you want to delete "${row?.title || "Workshop"}"? This action cannot be undone.` }))) return;
 
     try {
       setDeleting((prev) => new Set(prev).add(id));
